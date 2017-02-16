@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MyParticleMesh : MonoBehaviour {
-    public Vector3[] vertices;
-    public Vector3[] normals;
-    public Vector2[] uvs;
-    public int[] triangles;
+    Vector3[] vertices;
+    Vector3[] normals;
+    Vector2[] uvs;
+    int[] triangles;
+    Mesh mesh;
+
     void Start()
     {
         MeshFilter mf = GetComponent<MeshFilter>();
-        Mesh mesh = new Mesh();
+        mesh = new Mesh();
 
         int w, h;
         w = 10;
@@ -33,10 +35,10 @@ public class MyParticleMesh : MonoBehaviour {
         mesh.triangles = triangles;
 
         normals = new Vector3[4];
-        normals[0] = -Vector3.forward;
-        normals[1] = -Vector3.forward;
-        normals[2] = -Vector3.forward;
-        normals[3] = -Vector3.forward;
+        normals[0] = Vector3.forward;
+        normals[1] = Vector3.forward;
+        normals[2] = Vector3.forward;
+        normals[3] = Vector3.forward;
         mesh.normals = normals;
 
         uvs = new Vector2[4];
@@ -54,9 +56,9 @@ public class MyParticleMesh : MonoBehaviour {
         int i = 0;
         while (i < vertices.Length)
         {
-            vertices[i] += normals[i] * Mathf.Sin(Time.time);
+            vertices[i] += normals[i] * Mathf.Sin(Time.time/10);
             i++;
         }
-        //mesh.vertices = vertices;
+        mesh.vertices = vertices;
     }
 }
