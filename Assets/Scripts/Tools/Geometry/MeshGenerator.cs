@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Tools.Geometry {
+namespace Assets.Scripts.Tools.Geometry {
     public static class MeshGenerator {
         public static Mesh NewCircleMesh( int refineCount, float scale = 1 ) {
             refineCount = refineCount < 3 ? 3 : refineCount;

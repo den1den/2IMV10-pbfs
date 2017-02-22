@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Assets.Tools.Geometry {
+namespace Assets.Scripts.Tools.Geometry {
     public static class PrimitiveHelper {
         private static Dictionary<PrimitiveType, Mesh> primitiveMeshes = new Dictionary<PrimitiveType, Mesh>();
 
