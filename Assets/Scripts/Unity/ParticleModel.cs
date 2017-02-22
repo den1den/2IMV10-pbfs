@@ -8,9 +8,9 @@ using UnityEngine;
 /// </summary>
 public class ParticleModel : MonoBehaviour
 {
-    Vector3[] positions;
-    Vector3[] velocities;
-    float[] masses;
+    public Vector3[] positions;
+    public Vector3[] velocities;
+    public float[] masses;
 
     ParticleModelCalculator pmc;
 
@@ -49,6 +49,6 @@ public class ParticleModel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        pmc.Update();
     }
 }
