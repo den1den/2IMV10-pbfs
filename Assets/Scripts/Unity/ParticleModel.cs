@@ -49,6 +49,6 @@ public class ParticleModel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        pmc.Update();
+        pmc.Update(Time.deltaTime);
     }
 }
