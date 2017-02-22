@@ -10,7 +10,28 @@ namespace Assets.Scripts {
         MonoManager<SceneObject> objectManager;
 
         void Start( ) {
-            //testParticleVis( );
+            testPhysics( );
+        }
+
+        void testPhysics( ) {
+            GameObject unitPrefab = new GameObject();
+            objectManager = new MonoManager<SceneObject>( );
+            unitPrefab.AddComponent<SceneObject>( );
+            unitPrefab.AddComponent<MeshFilter>( );
+            unitPrefab.AddComponent<MeshRenderer>( );
+            unitPrefab.AddComponent<MeshCollider>( );
+            objectManager.OverrideGameObject( unitPrefab );
+
+            SceneObject so = objectManager.New( );
+
+            Mesh cube = Tools.Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
+            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+
+            so.GetComponent<MeshCollider>( ).sharedMesh = cube;
+            so.GetComponent<MeshFilter>( ).sharedMesh = cube;
+            so.GetComponent<MeshRenderer>( ).sharedMaterial = material;
+
+
         }
 
         void testDeform() {
@@ -43,7 +64,7 @@ namespace Assets.Scripts {
         }
 
         void Update( ) {
-            if ( objectManager != null ) {
+            if ( objectManager != null && false) {
                 foreach ( var t in objectManager.GetAll( ) ) {
                     Mesh m = t.GetComponent<MeshFilter>().mesh;
                     Vector3[] vertices = m.vertices;
