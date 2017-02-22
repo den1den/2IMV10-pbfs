@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.Simulation.EnergyFunctions;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -42,9 +43,34 @@ public class ParticleModelCalculator
             positions2[i] = pm.positions[i] + velocities2[i] * dt;
         }
 
-        // TODO: Energy functions
+        // Solve C(x + dx) == 0
+        // Newton-Raphson: x_{n+1} = x_n - f(x_n)/f'(x_n), but computationally expensive
+        // https://nl.wikipedia.org/wiki/Methode_van_Newton-Raphson
 
-        for(int i = 0; i < velocities2.Length; i++)
+        // Gauss-Seidel for Newton-Raphson on system of C equation is faster.
+        // (section 6: Gauss-Seidel could solve n*n equations, while Newton-Raphson only n. So factor n faster)
+        // (Can be in parrallel)
+        // Ax=b     x_{n+1} = A_{lower}^{-1} (b - A_{strict upper} x_{n})
+        // https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
+
+        // Successive over-relaxation, improved Gauss-Seidel
+        // https://en.wikipedia.org/wiki/Successive_over-relaxation
+
+        // Single EnergyFunction solves
+        // (1) C(x + ∆x) = C(x) + ∇_x C^T(x) ∆x = 0
+        // where the gradient ∇ = (dx, dy, dz)
+        // (2) considering the mass we have: ∆x = 1/m λ ∇_x C(x)
+        // (3) subsituting: λ = -C(x) / ( Sum_i w_i |∇_{x,i} C(x)|^2 )
+
+        Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions");
+        for(int i = 0; i < pm.efs.Length; i++)
+        {
+            EnergyFunction e = pm.efs[i];
+            // TODO: solve has to be implemented, maby solve cannot be called like this because more is required.
+            //e.solve();
+        }
+        
+        for (int i = 0; i < velocities2.Length; i++)
         {
             velocities2[i] = (1.0f / dt) * (positions2[i] - pm.positions[i]);
         }
