@@ -58,14 +58,13 @@ public class ParticleModelCalculator
             pm.positions[i] = positions2[i];
             pm.velocities[i] = velocities2[i];
         }
-        // TODO: draw again
     }
 
     private void setForces(float dt)
     {
-        const float MAG = 0.2f; // The magnitude of the force
-        const float SPEED = 0.1f; // The speed of the change in direction of the force
-        float F = Mathf.Sin(Time.time * SPEED) * MAG;
+        const float MAG = 5f; // The magnitude of the force
+        const float SPEED = 2f; // The speed of the change in direction of the force
+        float F = Mathf.Cos(Time.time * SPEED) * MAG;
         for (int i = 0; i < forces.Length; i++)
         {
             forces[i] = Vector3.right * F;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Scripts.Tools.Visualisation;
+using System;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -14,11 +15,12 @@ public class ParticleModel : MonoBehaviour
 
     ParticleModelCalculator pmc;
 
+    ParticleVisualisation simpleVis;
+
     // Use this for initialization
     void Start()
     {
-        pmc = new ParticleModelCalculator(this);
-        const int RES = 50;
+        const int RES = 7;
 
         const float dx = 200f / RES; // total size devided by resolution 
         const float dy = dx;
@@ -44,11 +46,16 @@ public class ParticleModel : MonoBehaviour
         }
 
         velocities = new Vector3[positions.Length];
+        
+        pmc = new ParticleModelCalculator(this);
+        simpleVis = new ParticleVisualisation(positions);
     }
 
     // Update is called once per frame
     void Update()
     {
         pmc.Update(Time.deltaTime);
+
+        simpleVis.UpdatePositions(positions);
     }
 }
