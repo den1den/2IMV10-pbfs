@@ -10,6 +10,7 @@ using UnityEngine;
 public class ParticleModelCalculator
 {
     ParticleModel pm;
+    Vector3[] initialPositions;
     Vector3[] forces;
     float[] massInv;
 
@@ -20,6 +21,8 @@ public class ParticleModelCalculator
         forces = new Vector3[pm.positions.Length];
         velocities2 = new Vector3[pm.positions.Length];
         positions2 = new Vector3[pm.positions.Length];
+        initialPositions = new Vector3[pm.positions.Length];
+        Array.Copy(pm.positions, initialPositions, pm.positions.Length);
 
         // Create mass^{-1} vector because mass is only used like this
         massInv = new float[pm.masses.Length];
