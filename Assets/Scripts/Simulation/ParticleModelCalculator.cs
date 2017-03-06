@@ -12,7 +12,6 @@ public class ParticleModelCalculator
     ParticleModel pm;
     Vector3[] initialPositions;
     Vector3[] forces;
-    float[] massInv;
 
     public ParticleModelCalculator(ParticleModel pm)
     {
@@ -24,12 +23,6 @@ public class ParticleModelCalculator
         initialPositions = new Vector3[pm.positions.Length];
         Array.Copy(pm.positions, initialPositions, pm.positions.Length);
 
-        // Create mass^{-1} vector because mass is only used like this
-        massInv = new float[pm.masses.Length];
-        for(int i = 0; i < massInv.Length; i++)
-        {
-            massInv[i] = 1.0f / pm.masses[i];
-        }
     }
 
     Vector3[] velocities2;
@@ -42,7 +35,7 @@ public class ParticleModelCalculator
 
         for(int i = 0; i < velocities2.Length; i++)
         {
-            velocities2[i] = pm.velocities[i] + forces[i] * dt * massInv[i];
+            velocities2[i] = pm.velocities[i] + forces[i] * dt * pm.inverseMasses[i];
             positions2[i] = pm.positions[i] + velocities2[i] * dt;
         }
 

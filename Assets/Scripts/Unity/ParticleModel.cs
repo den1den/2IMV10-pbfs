@@ -15,6 +15,7 @@ public class ParticleModel : MonoBehaviour
     public Vector3[] positions;
     public Vector3[] velocities;
     public float[] masses;
+    public float[] inverseMasses;
 
     public int[] triangleIndices;
 
@@ -75,15 +76,19 @@ public class ParticleModel : MonoBehaviour
 
         // Set masses
         masses = new float[positions.Length];
+        inverseMasses = new float[masses.Length];
         for (i = 0; i < masses.Length; i++)
         {
             masses[i] = 1f;
+            inverseMasses[i] = 1f;
         }
 
         // Set masses of endpoints at y=0 to zero to make it static
         // TODO: mass of 0 = static point
         // masses[0] = 0; // x=0, y=0
         // masses[(nx - 1) * ny + 0] = 0; // x = nx, y = 0
+        // inverseMasses[0] = -1;
+        // inverseMasses[(nx - 1) * ny + 0] = -1; // x = nx, y = 0
     }
 
     // Use this for initialization
