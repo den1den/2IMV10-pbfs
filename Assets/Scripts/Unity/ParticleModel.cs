@@ -128,7 +128,7 @@ public class ParticleModel : MonoBehaviour
             int i2 = triangleIndices[i + 2];
 
             // Only add FEMTetConstriant for now
-            EnergyFunction fem = FEMFunction.create(this, i0, i1, i2);
+            EnergyFunction fem = FEMTriangleFunction.create(this, i0, i1, i2);
             if(fem != null)
             {
                 efs.Add(fem);
