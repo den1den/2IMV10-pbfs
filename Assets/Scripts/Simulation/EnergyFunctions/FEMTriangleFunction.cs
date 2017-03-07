@@ -94,7 +94,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         /// Based on code by Müller and Bender. The original C++ code is available through the following link:
         /// https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/a737f21a704a94227c943a9a2291a0e9f31366e2/PositionBasedDynamics/PositionBasedDynamics.cpp#L882
         /// </summary>
-        public void solve()
+        public void solve(ref Vector3[] positions)
         {
 
             // Orthotropic elasticity tensor
@@ -106,9 +106,9 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             C[2, 2] = youngsModulusShear;
 
 
-            Vector3 p0 = pm.positions[i0];
-            Vector3 p1 = pm.positions[i1];
-            Vector3 p2 = pm.positions[i2];
+            Vector3 p0 = positions[i0];
+            Vector3 p1 = positions[i1];
+            Vector3 p2 = positions[i2];
 
             // Determine \partial x/\partial m_i
             Matrix4x4 F = Matrix4x4.zero;
@@ -170,7 +170,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
                 {
                     int particle = particles[i];
                     if(pm.inverseMasses[particle] != 0f)
-                        pm.positions[particle] += -(s * pm.inverseMasses[particle]) * gradC[i];
+                        positions[particle] += -(s * pm.inverseMasses[particle]) * gradC[i];
 
                 }
             }

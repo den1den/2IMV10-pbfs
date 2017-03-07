@@ -64,7 +64,7 @@ public class ParticleModelCalculator
         for (int iteration = 0; iteration < ITERATIONS; ++iteration) {
             foreach(EnergyFunction e in pm.efs)
             {
-                e.solve();
+                e.solve(ref positions2);
             }
         }
         
