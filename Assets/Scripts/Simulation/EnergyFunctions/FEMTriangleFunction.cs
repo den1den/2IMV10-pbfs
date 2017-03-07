@@ -18,14 +18,28 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         int[] particles;
         float area;
         Matrix4x4 invRestMat;
-        
-        private FEMTriangleFunction(ParticleModel pm, int i0, int i1, int i2, float area, Matrix4x4 invRestMat)
+
+        float youngsModulusX;
+        float youngsModulusY;
+        float youngsModulusShear;
+        float poissonRatioXY;
+        float poissonRatioYX;
+
+
+        private FEMTriangleFunction(ParticleModel pm, int i0, int i1, int i2, float area, float youngsModulusX, 
+            float youngsModulusY, float youngsModulusShear, float poissonRatioXY, float poissonRatioYX, Matrix4x4 invRestMat)
         {
             this.pm = pm;
             this.i0 = i0;
             this.i1 = i1;
             this.i2 = i2;
             particles = new int[] { i0, i1, i2};
+
+            this.youngsModulusX = youngsModulusX;
+            this.youngsModulusY = youngsModulusY;
+            this.youngsModulusShear = youngsModulusShear;
+            this.poissonRatioXY = poissonRatioXY;
+            this.poissonRatioYX = poissonRatioYX;
  
             this.area = area;
             this.invRestMat = invRestMat;
@@ -37,7 +51,8 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         /// <param name="i0">Index of 0 particle of triangle</param>
         /// <param name="i1">Index of 1 particle of triangle</param>
         /// <param name="i2">Index of 2 particle of triangle</param>
-        public static FEMTriangleFunction create(ParticleModel pm, int i0, int i1, int i2)
+        public static FEMTriangleFunction create(ParticleModel pm, int i0, int i1, int i2, float youngsModulusX,
+            float youngsModulusY, float youngsModulusShear, float poissonRatioXY, float poissonRatioYX)
         {
             Vector3 p0 = pm.positions[i0];
             Vector3 p1 = pm.positions[i1];
@@ -68,7 +83,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
                 float area = Math.Abs(normal.magnitude) * 0.5f;
                 Debug.Log("Triangle (" + p0 + ", " + p1 + ", " + p2 + ")");
                 Debug.Log("Has area " + area + "\n");
-                return new FEMTriangleFunction(pm, i0, i1, i2, area, invRestMat);
+                return new FEMTriangleFunction(pm, i0, i1, i2, area, youngsModulusX, youngsModulusY, youngsModulusShear, poissonRatioXY, poissonRatioYX, invRestMat);
             }
             // determinant ~= 0
             return null;
@@ -81,12 +96,6 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         /// </summary>
         public void solve()
         {
-
-            const float youngsModulusX = 0;
-            const float youngsModulusY = 0;
-            const float youngsModulusShear = 0;
-            const float poissonRatioXY = 0;
-            const float poissonRatioYX = 0;
 
             // Orthotropic elasticity tensor
             Matrix4x4 C = Matrix4x4.zero;
