@@ -30,7 +30,7 @@ namespace Assets.Scripts.Tools.Geometry {
             return m;
         }
 
-        public static Mesh NewPlane( float xSize, float ySize, float z, bool centered, float cx = 0, float cy = 0 ) {
+        public static Mesh NewPlane( float xSize, float zSize, float y, bool centered, float cx = 0, float cy = 0 ) {
             Mesh m = new Mesh();
             m.name = "ScriptedMesh";
 
@@ -42,20 +42,20 @@ namespace Assets.Scripts.Tools.Geometry {
             if ( centered ) {
                 xLow = -xSize / 2;
                 xHigh = xSize / 2;
-                yLow = -ySize / 2;
-                yHigh = ySize / 2;
+                yLow = -zSize / 2;
+                yHigh = zSize / 2;
             }
             else {
                 xLow = yLow = 0;
                 xHigh = xSize;
-                yHigh = ySize;
+                yHigh = zSize;
             }
 
             m.vertices = new Vector3[ ] {
-                new Vector3(xLow + cx, yLow + cy, z),
-                new Vector3(xHigh + cx, yLow + cy, z),
-                new Vector3(xHigh + cx, yHigh + cy, z),
-                new Vector3(xLow + cx, yHigh + cy, z)
+                new Vector3(xLow + cx, y, yLow + cy),
+                new Vector3(xHigh + cx, y, yLow + cy),
+                new Vector3(xHigh + cx, y, yHigh + cy),
+                new Vector3(xLow + cx, y, yHigh + cy)
             };
             m.uv = new Vector2[ ] {
                  new Vector2 (0, 0),
@@ -63,7 +63,7 @@ namespace Assets.Scripts.Tools.Geometry {
                  new Vector2(1, 1),
                  new Vector2 (1, 0)
             };
-            m.triangles = new int[ ] { 0, 1, 2, 0, 2, 3 };
+            m.triangles = new int[ ] { 2, 1, 0, 3, 2, 0 };
             m.RecalculateNormals( );
 
             return m;

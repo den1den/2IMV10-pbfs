@@ -14,23 +14,50 @@ namespace Assets.Scripts {
         }
 
         void testPhysics( ) {
-            GameObject unitPrefab = new GameObject();
+            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+
+            GameObject solidPrefab = new GameObject();
             objectManager = new MonoManager<SceneObject>( );
-            unitPrefab.AddComponent<SceneObject>( );
-            unitPrefab.AddComponent<MeshFilter>( );
-            unitPrefab.AddComponent<MeshRenderer>( );
-            unitPrefab.AddComponent<MeshCollider>( );
-            objectManager.OverrideGameObject( unitPrefab );
+            solidPrefab.AddComponent<SceneObject>( );
+            solidPrefab.AddComponent<MeshFilter>( );
+            solidPrefab.AddComponent<MeshRenderer>( );
+            solidPrefab.AddComponent<MeshCollider>( );
+            solidPrefab.AddComponent<Rigidbody>( );
+            objectManager.OverrideGameObject( solidPrefab );
 
             SceneObject so = objectManager.New( );
 
-            Mesh cube = Tools.Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
-            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+            Mesh cubeMesh = Tools.Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
+            
 
-            so.GetComponent<MeshCollider>( ).sharedMesh = cube;
-            so.GetComponent<MeshFilter>( ).sharedMesh = cube;
+            so.transform.Translate(0, 10, 0 );
+            so.GetComponent<MeshCollider>( ).sharedMesh = cubeMesh;
+            so.GetComponent<MeshFilter>( ).sharedMesh = cubeMesh;
             so.GetComponent<MeshRenderer>( ).sharedMaterial = material;
+            so.GetComponent<Rigidbody>( ).isKinematic = false;
+            so.GetComponent<MeshCollider>( ).convex = true;
+            //var obj = Tools.Geometry.PrimitiveHelper.CreatePrimitive(PrimitiveType.Capsule, true);
+            //obj.transform.Translate( 0, 10, 0 );
+            
 
+            // Floor
+
+            Mesh floorMesh = Tools.Geometry.MeshGenerator.NewPlane(10, 10, 0, true);
+
+            var staticManager = new MonoManager<SceneObject>( );
+
+            GameObject colliderPrefrab = new GameObject( );
+            colliderPrefrab.AddComponent<SceneObject>( );
+            colliderPrefrab.AddComponent<MeshFilter>( );
+            colliderPrefrab.AddComponent<MeshRenderer>( );
+            colliderPrefrab.AddComponent<MeshCollider>( );
+            staticManager.OverrideGameObject( colliderPrefrab );
+
+            SceneObject floor = staticManager.New( );
+            floor.GetComponent<MeshCollider>( ).sharedMesh = floorMesh;
+            floor.GetComponent<MeshFilter>( ).sharedMesh = floorMesh;
+            floor.GetComponent<MeshRenderer>( ).sharedMaterial = material;
+            floor.name = "Floor";
 
         }
 
@@ -97,6 +124,20 @@ namespace Assets.Scripts {
 
         public override void Destroy( ) {
             Destroy( gameObject );
+        }
+
+        void OnCollisionEnter( Collision col ) {
+
+        }
+
+        void OnCollisionStay( Collision col ) {
+            Debug.Log( "OnCollisionEnter, impulse: " + col.impulse );
+            foreach ( var contact in col.contacts ) {
+                Debug.Log( " - point: " + contact.point + " - normal: " + contact.normal + " - distance " + contact.separation );
+            }
+        }
+        void OnCollisionExit( Collision col ) {
+            
         }
 
     }
