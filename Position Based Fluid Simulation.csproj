@@ -76,6 +76,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\GUI\InputField1.cs" />
+    <Compile Include="Assets\Scripts\Simulation\EnergyFunctions\EnergyFunction.cs" />
+    <Compile Include="Assets\Scripts\Simulation\EnergyFunctions\FEMFunction.cs" />
     <Compile Include="Assets\Scripts\Simulation\ParticleModelCalculator.cs" />
     <Compile Include="Assets\Scripts\Simulation\Sim.cs" />
     <Compile Include="Assets\Scripts\Simulation\TriangularMeshCalculator.cs" />
