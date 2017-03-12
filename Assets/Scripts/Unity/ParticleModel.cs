@@ -115,6 +115,13 @@ public class ParticleModel : MonoBehaviour
 
     private void initConstraints()
     {
+        // Initial values taken from https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/Simulation/SimulationModel.cpp#L11 onwards.
+        const float youngsModulusX = 1;
+        const float youngsModulusY = 1;
+        const float youngsModulusShear = 1;
+        const float poissonRatioXY = 0.3f;
+        const float poissonRatioYX = 0.3f;
+
         // https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/ClothDemo/main.cpp#L354
         // loop over every triangle
 
@@ -128,7 +135,7 @@ public class ParticleModel : MonoBehaviour
             int i2 = triangleIndices[i + 2];
 
             // Only add FEMTetConstriant for now
-            EnergyFunction fem = FEMFunction.create(this, i0, i1, i2);
+            EnergyFunction fem = FEMTriangleFunction.create(this, i0, i1, i2, youngsModulusX, youngsModulusY, youngsModulusShear, poissonRatioXY, poissonRatioYX);
             if(fem != null)
             {
                 efs.Add(fem);
