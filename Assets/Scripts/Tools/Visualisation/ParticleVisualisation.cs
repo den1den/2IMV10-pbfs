@@ -3,29 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Tools.Visualisation {
-
+    /// <summary>
+    /// Given a set of positions, points/particles are rendered in unity
+    /// </summary>
     public class ParticleVisualisation {
 
         MonoManager<SceneObject> objectManager;
 
-        public class ParticleObject : MonoManagable {
+        private TriangularMesh model;
 
-            public override void Create( ) {
-                // called on creation, cannot have parameters
-            }
-
-            public void Init( Mesh mesh, Material material ) {
-                this.gameObject.GetComponent<MeshFilter>( ).sharedMesh = mesh;
-                this.gameObject.GetComponent<MeshRenderer>( ).sharedMaterial = material;
-            }
-
-            public override void Destroy( ) {
-                Destroy( gameObject );
-            }
-
-        }
-
-        public ParticleVisualisation( Vector3[ ] particles ) {
+        public ParticleVisualisation( TriangularMesh model ) {
+            this.model = model;
             GameObject unitPrefab = new GameObject();
             objectManager = new MonoManager<SceneObject>( );
             // elements required to show the object in unity:
@@ -38,18 +26,25 @@ namespace Assets.Scripts.Tools.Visualisation {
             Mesh mesh = Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
             Material material = new Material(Shader.Find("Transparent/Diffuse"));
 
-            for ( int i = 0; i < particles.Length; i++ ) {
+            Vector3[] points = this.model.getMainPoints();
+            for ( int i = 0; i < points.Length; i++ ) {
                 var newObj = objectManager.New( );
                 newObj.Init( mesh, material );
-                newObj.transform.position = particles[ i ];
+                newObj.transform.position = points[ i ];
             }
         }
 
-        public void UpdatePositions( Vector3[ ] particles ) {
+        public ParticleVisualisation(TriangularMesh model, ClothSimulation settings) : this(model)
+        {
+            // Could store extra settings from the Unity GUI via the ClothSimulation class
+        }
+
+        public void UpdatePositions( ) {
             int i = 0;
+            Vector3[] points = this.model.getMainPoints();
             foreach ( var obj in objectManager.GetAll( ) ) {
-                if ( i > particles.Length ) break;
-                obj.transform.position = particles[ i++ ];
+                if ( i > points.Length ) break;
+                obj.transform.position = points[ i++ ];
             }
         }
     }

@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.5.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -75,18 +77,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Unity\ClothSimulation.cs" />
     <Compile Include="Assets\Scripts\GUI\InputField1.cs" />
     <Compile Include="Assets\Scripts\Simulation\EnergyFunctions\EnergyFunction.cs" />
-    <Compile Include="Assets\Scripts\Simulation\EnergyFunctions\FEMFunction.cs" />
+    <Compile Include="Assets\Scripts\Simulation\EnergyFunctions\FEMTriangleFunction.cs" />
     <Compile Include="Assets\Scripts\Simulation\ParticleModelCalculator.cs" />
-    <Compile Include="Assets\Scripts\Simulation\Sim.cs" />
     <Compile Include="Assets\Scripts\Simulation\TriangularMeshCalculator.cs" />
     <Compile Include="Assets\Scripts\Tools\Geometry\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\Tools\Geometry\PrimitiveHelper.cs" />
     <Compile Include="Assets\Scripts\Tools\ManagmentMono.cs" />
     <Compile Include="Assets\Scripts\Tools\Visualisation\ParticleVisualisation.cs" />
-    <Compile Include="Assets\Scripts\Unity\ParticleModel.cs" />
-    <Compile Include="Assets\Scripts\Unity\TriangularMesh.cs" />
+    <Compile Include="Assets\Scripts\Simulation\ParticleModel.cs" />
+    <Compile Include="Assets\Scripts\Simulation\TriangularMesh.cs" />
     <Compile Include="Assets\Scripts\UnityTesting.cs" />
     <Compile Include="Assets\Scripts\Util.cs" />
   </ItemGroup>

@@ -7,9 +7,9 @@ using UnityEngine;
 /// At first this will just be the similar to the particlemodel
 /// </summary>
 public class TriangularMeshCalculator : MonoBehaviour {
-    TriangularMesh tm;
+    TriangularModelMesh tm;
 
-    public TriangularMeshCalculator(TriangularMesh tm)
+    public TriangularMeshCalculator(TriangularModelMesh tm)
     {
         this.tm = tm;
     }
