@@ -86,7 +86,7 @@ namespace Assets.Scripts {
             testArr[ 1 ].Set( -1, 1, 0 );
             testArr[ 2 ].Set( 1, 1, 0 );
             testArr[ 3 ].Set( 1, -1, 0 );
-            var pv = new Tools.Visualisation.ParticleVisualisation(testArr);
+            var pv = new Tools.Visualisation.ParticleVisualisation(new SimplePositionTriangleMesh(testArr));
             
         }
 

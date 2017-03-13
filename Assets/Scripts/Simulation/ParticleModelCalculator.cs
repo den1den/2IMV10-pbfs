@@ -13,6 +13,8 @@ public class ParticleModelCalculator
     Vector3[] initialPositions;
     Vector3[] forces;
 
+    const int ITERATIONS = 5;
+
     public ParticleModelCalculator(ParticleModel pm)
     {
         this.pm = pm;
@@ -58,12 +60,12 @@ public class ParticleModelCalculator
         // (2) considering the mass we have: ∆x = 1/m λ ∇_x C(x)
         // (3) subsituting: λ = -C(x) / ( Sum_i w_i |∇_{x,i} C(x)|^2 )
 
-        Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions");
-        for(int i = 0; i < pm.efs.Length; i++)
-        {
-            EnergyFunction e = pm.efs[i];
-            // TODO: solve has to be implemented, maby solve cannot be called like this because more is required.
-            //e.solve();
+        Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions, iterating "+ITERATIONS+" times");
+        for (int iteration = 0; iteration < ITERATIONS; ++iteration) {
+            foreach(EnergyFunction e in pm.efs)
+            {
+                e.solve(ref positions2);
+            }
         }
         
         for (int i = 0; i < velocities2.Length; i++)

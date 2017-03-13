@@ -7,8 +7,9 @@ using System.Text;
 using UnityEngine;
 
 /// <summary>
-/// This class only binds to a Unity GameObject.
-/// A aquare particle model
+/// This is the actual model as described in the original paper.
+/// It should not be depending on any energy function
+/// It is used to apply external forces and execute the symplectic euler intergration scheme (update velocities/speeds/masses)
 /// </summary>
 public class ParticleModel : MonoBehaviour
 {
@@ -23,12 +24,10 @@ public class ParticleModel : MonoBehaviour
 
     ParticleModelCalculator pmc;
 
-    ParticleVisualisation simpleVis;
-
     /// <summary>
     /// Set this.positions 
     /// </summary>
-    void initPoints(float dx, float dy, int nx, int ny, float zCoord)
+    private void initPoints(float dx, float dy, int nx, int ny, float zCoord)
     {
         // set positions
         positions = new Vector3[nx * ny];
@@ -92,13 +91,13 @@ public class ParticleModel : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start()
+    public ParticleModel(ClothSimulation settings)
     {
         // Create particles
-        const int RES = 7;
-        const float SIZE = 200f;
-        const float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
-        const float zCoord = 1;
+        int RES = settings.particles;
+        float SIZE = settings.totalSize;
+        float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
+        float zCoord = 1;
         initPoints(D, D, RES, RES, zCoord);
         Debug.Log(positions.Length + " particles created");
 
@@ -108,13 +107,17 @@ public class ParticleModel : MonoBehaviour
         // Initialize simulation calculation
         velocities = new Vector3[positions.Length];
         pmc = new ParticleModelCalculator(this);
-
-        // Render visible aspect of this particle model
-        simpleVis = new ParticleVisualisation(positions);
     }
 
     private void initConstraints()
     {
+        // Initial values taken from https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/Simulation/SimulationModel.cpp#L11 onwards.
+        const float youngsModulusX = 1;
+        const float youngsModulusY = 1;
+        const float youngsModulusShear = 1;
+        const float poissonRatioXY = 0.3f;
+        const float poissonRatioYX = 0.3f;
+
         // https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/ClothDemo/main.cpp#L354
         // loop over every triangle
 
@@ -128,7 +131,7 @@ public class ParticleModel : MonoBehaviour
             int i2 = triangleIndices[i + 2];
 
             // Only add FEMTetConstriant for now
-            EnergyFunction fem = FEMFunction.create(this, i0, i1, i2);
+            EnergyFunction fem = FEMTriangleFunction.create(this, i0, i1, i2, youngsModulusX, youngsModulusY, youngsModulusShear, poissonRatioXY, poissonRatioYX);
             if(fem != null)
             {
                 efs.Add(fem);
@@ -144,9 +147,7 @@ public class ParticleModel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Update via the simulation
+        // Update model via the ParticleModelCalculator
         pmc.Update(Time.deltaTime);
-        // Show new positions
-        simpleVis.UpdatePositions(positions);
     }
 }
