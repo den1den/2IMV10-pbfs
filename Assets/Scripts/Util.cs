@@ -22,4 +22,14 @@ public abstract class Util : MonoBehaviour
         m[3, 3] = 1;
         return m;
     }
+
+    internal static float getTotalDifference(Vector3[] a, Vector3[] b)
+    {
+        float diff = 0;
+        for(int i = 0; i < a.Length; i++)
+        {
+            diff += (a[i] - b[i]).magnitude;
+        }
+        return diff;
+    }
 }

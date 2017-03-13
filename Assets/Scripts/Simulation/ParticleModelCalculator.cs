@@ -30,9 +30,12 @@ public class ParticleModelCalculator
     Vector3[] velocities2;
     Vector3[] positions2;
 
+    int update = 0;
+
     // Update is called once per frame
     public void Update(float dt)
     {
+        update++;
         setForces(dt);
 
         for(int i = 0; i < velocities2.Length; i++)
@@ -40,6 +43,7 @@ public class ParticleModelCalculator
             velocities2[i] = pm.velocities[i] + forces[i] * dt * pm.inverseMasses[i];
             positions2[i] = pm.positions[i] + velocities2[i] * dt;
         }
+        Debug.Log("positions2: " + positions2);
 
         // Solve C(x + dx) == 0
         // Newton-Raphson: x_{n+1} = x_n - f(x_n)/f'(x_n), but computationally expensive
@@ -61,13 +65,17 @@ public class ParticleModelCalculator
         // (3) subsituting: λ = -C(x) / ( Sum_i w_i |∇_{x,i} C(x)|^2 )
 
         Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions, iterating "+ITERATIONS+" times");
+        Vector3[] debugPreEnergyFunctionPostitions = new Vector3[positions2.Length];
+        Array.Copy(positions2, debugPreEnergyFunctionPostitions, positions2.Length);
         for (int iteration = 0; iteration < ITERATIONS; ++iteration) {
             foreach(EnergyFunction e in pm.efs)
             {
                 e.solve(ref positions2);
             }
         }
-        
+        float diff = Util.getTotalDifference(debugPreEnergyFunctionPostitions, positions2);
+        Debug.Log("EnergyFunction provide total change of " + diff);
+
         for (int i = 0; i < velocities2.Length; i++)
         {
             velocities2[i] = (1.0f / dt) * (positions2[i] - pm.positions[i]);
@@ -86,12 +94,10 @@ public class ParticleModelCalculator
 
     private void setForces(float dt)
     {
-        const float MAG = 5f; // The magnitude of the force
-        const float SPEED = 2f; // The speed of the change in direction of the force
-        float F = Mathf.Cos(Time.time * SPEED) * MAG;
+        const float G = 9.81f;
         for (int i = 0; i < forces.Length; i++)
         {
-            forces[i] = Vector3.right * F;
+            forces[i] = Vector3.down * G;
         }
     }
 }

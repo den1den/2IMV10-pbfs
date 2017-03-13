@@ -32,6 +32,8 @@ public class ClothSimulation : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+        model.Update();
+        meshModel.Update();
+        simpleVis.Update();
 	}
 }

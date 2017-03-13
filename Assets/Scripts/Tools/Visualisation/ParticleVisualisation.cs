@@ -24,14 +24,19 @@ namespace Assets.Scripts.Tools.Visualisation {
             objectManager.OverrideGameObject( unitPrefab );
 
             Mesh mesh = Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
-            Material material = new Material(Shader.Find("Transparent/Diffuse"));
+            Material defaultMaterial = new Material(Shader.Find("Transparent/Diffuse"));
+
+            Material specialMaterial = new Material(Shader.Find("Transparent/Diffuse"));
+            specialMaterial.color = Color.red;
 
             Vector3[] points = this.model.getMainPoints();
             for ( int i = 0; i < points.Length; i++ ) {
+                Material material = this.model.isSpecialPoint(i) ? specialMaterial : defaultMaterial;
                 var newObj = objectManager.New( );
                 newObj.Init( mesh, material );
                 newObj.transform.position = points[ i ];
             }
+            Debug.Log("Prticle visualization initialized for " + points.Length + " particles");
         }
 
         public ParticleVisualisation(TriangularMesh model, ClothSimulation settings) : this(model)
@@ -39,12 +44,12 @@ namespace Assets.Scripts.Tools.Visualisation {
             // Could store extra settings from the Unity GUI via the ClothSimulation class
         }
 
-        public void UpdatePositions( ) {
+        public void Update( ) {
             int i = 0;
             Vector3[] points = this.model.getMainPoints();
             foreach ( var obj in objectManager.GetAll( ) ) {
                 if ( i > points.Length ) break;
-                obj.transform.position = points[ i++ ];
+                obj.transform.position = points[i++];
             }
         }
     }

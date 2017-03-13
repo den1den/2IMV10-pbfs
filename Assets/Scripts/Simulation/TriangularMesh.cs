@@ -18,21 +18,34 @@ public class TriangularModelMesh : TriangularMesh
         this.tmc = new TriangularMeshCalculator(this);
     }
 
-    public Vector3[] getMainPoints()
+    public override Vector3[] getMainPoints()
     {
         return model.positions;
     }
 
-    public Vector3[] getSubPoints()
+    public override Vector3[] getSubPoints()
     {
         //TODO store/track subparticlepoints
         return new Vector3[0];
     }
+
+    public override void Update()
+    {
+        // No calculations needed on subparticles
+    }
+
+    public override bool isSpecialPoint(int i)
+    {
+        return i == 0 || i == 6;
+    }
 }
 
-public interface TriangularMesh
+public abstract class TriangularMesh
 {
-    Vector3[] getMainPoints();
+    public abstract Vector3[] getMainPoints();
+    public virtual Vector3[] getSubPoints() { return new Vector3[0];  }
+    public virtual bool isSpecialPoint(int i) { return false; }
+    public virtual void Update() { }
 }
 
 public class SimplePositionTriangleMesh : TriangularMesh
@@ -42,7 +55,7 @@ public class SimplePositionTriangleMesh : TriangularMesh
     {
         this.points = points;
     }
-    public Vector3[] getMainPoints()
+    public override Vector3[] getMainPoints()
     {
         return this.points;
     }

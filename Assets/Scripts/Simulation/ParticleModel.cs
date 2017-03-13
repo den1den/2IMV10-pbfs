@@ -27,35 +27,35 @@ public class ParticleModel : MonoBehaviour
     /// <summary>
     /// Set this.positions 
     /// </summary>
-    private void initPoints(float dx, float dy, int nx, int ny, float zCoord)
+    private void initPoints(float dx, float dy, int nx, int nz, float yCoord)
     {
         // set positions
-        positions = new Vector3[nx * ny];
+        positions = new Vector3[nx * nz];
         for (int x = 0; x < nx; x++)
-            for (int y = 0; y < ny; y++)
-                    positions[x * ny + y] = new Vector3(x * dx, y * dy, zCoord); // row major
+            for (int z = 0; z < nz; z++)
+                    positions[x * nz + z] = new Vector3(x * dx, yCoord, z * dy); // row major
 
-        triangleIndices = new int[(nx - 1) * (ny - 1) * 3 * 2];
+        triangleIndices = new int[(nx - 1) * (nz - 1) * 3 * 2];
         int i = 0;
-        for (int x0 = 0; x0 < nx - 1; x0++)
+        for (int i0 = 0; i0 < nx - 1; i0++)
         {
-            int x1 = x0 + 1;
-            for (int y0 = 0; y0 < ny - 1; y0++)
+            int x1 = i0 + 1;
+            for (int j0 = 0; j0 < nz - 1; j0++)
             {
-                int y1 = y0 + 1;
+                int y1 = j0 + 1;
                 // Create 2 triangles for each square
-                if ((x0 + y0) % 2 == 0) // Alternate the ordering of the triangles
+                if ((i0 + j0) % 2 == 0) // Alternate the ordering of the triangles
                 {
                     // 10 - 11
                     // |  \ |
                     // 00 - 01
                     // the two triangles are (00, 01, 10) and (11, 10, 01)
-                    triangleIndices[i++] = x0 * ny + y0;
-                    triangleIndices[i++] = x0 * ny + y1;
-                    triangleIndices[i++] = x1 * ny + y0;
-                    triangleIndices[i++] = x1 * ny + y1;
-                    triangleIndices[i++] = x1 * ny + y0;
-                    triangleIndices[i++] = x0 * ny + y1;
+                    triangleIndices[i++] = i0 * nz + j0;
+                    triangleIndices[i++] = i0 * nz + y1;
+                    triangleIndices[i++] = x1 * nz + j0;
+                    triangleIndices[i++] = x1 * nz + y1;
+                    triangleIndices[i++] = x1 * nz + j0;
+                    triangleIndices[i++] = i0 * nz + y1;
                 }
                 else
                 {
@@ -63,12 +63,12 @@ public class ParticleModel : MonoBehaviour
                     // |  / |
                     // 00 - 01
                     // the two triangles are (00, 01, 11) and (11, 10, 00)
-                    triangleIndices[i++] = x0 * ny + y0;
-                    triangleIndices[i++] = x0 * ny + y1;
-                    triangleIndices[i++] = x1 * ny + y1;
-                    triangleIndices[i++] = x1 * ny + y1;
-                    triangleIndices[i++] = x1 * ny + y0;
-                    triangleIndices[i++] = x0 * ny + y0;
+                    triangleIndices[i++] = i0 * nz + j0;
+                    triangleIndices[i++] = i0 * nz + y1;
+                    triangleIndices[i++] = x1 * nz + y1;
+                    triangleIndices[i++] = x1 * nz + y1;
+                    triangleIndices[i++] = x1 * nz + j0;
+                    triangleIndices[i++] = i0 * nz + j0;
                 }
             }
         }
@@ -83,11 +83,11 @@ public class ParticleModel : MonoBehaviour
         }
 
         // Set masses of endpoints at y=0 to zero to make it static
-        // TODO: mass of 0 = static point
-        // masses[0] = 0; // x=0, y=0
-        // masses[(nx - 1) * ny + 0] = 0; // x = nx, y = 0
-        // inverseMasses[0] = -1;
-        // inverseMasses[(nx - 1) * ny + 0] = -1; // x = nx, y = 0
+        // mass of 0 = static point
+        masses[0] = 0; // x=0, z=0
+        masses[(nx - 1) * nz + 0] = 0; // x = nx, z = 0
+        inverseMasses[0] = 0;
+        inverseMasses[(nx - 1) * nz + 0] = 0; // x = nx, y = 0
     }
 
     // Use this for initialization
@@ -145,7 +145,7 @@ public class ParticleModel : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void Update()
     {
         // Update model via the ParticleModelCalculator
         pmc.Update(Time.deltaTime);
