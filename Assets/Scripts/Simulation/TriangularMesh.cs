@@ -12,10 +12,14 @@ public class TriangularModelMesh : TriangularMesh
     private ParticleModel model;
     private TriangularMeshCalculator tmc;
 
-    public TriangularModelMesh(ParticleModel model, ClothSimulation settings)
+    public delegate bool IsSpecialFunc( int id );
+    IsSpecialFunc f;
+
+    public TriangularModelMesh(ParticleModel model, IsSpecialFunc f, ClothSimulation settings)
     {
         this.model = model;
         this.tmc = new TriangularMeshCalculator(this);
+        this.f = f;
     }
 
     public override Vector3[] getMainPoints()
@@ -36,7 +40,7 @@ public class TriangularModelMesh : TriangularMesh
 
     public override bool isSpecialPoint(int i)
     {
-        return i == 0 || i == 6;
+        return f( i );
     }
 }
 

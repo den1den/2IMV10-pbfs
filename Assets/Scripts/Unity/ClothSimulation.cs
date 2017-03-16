@@ -26,7 +26,7 @@ public class ClothSimulation : MonoBehaviour {
     // Use this for initialization
     void Start () {
         model = new ParticleModel(this);
-        meshModel = new TriangularModelMesh(model, this);
+        meshModel = new TriangularModelMesh(model, x => x == 0 || x == particles * particles - particles, this);
         simpleVis = new ParticleVisualisation(meshModel, this);
 	}
 	
