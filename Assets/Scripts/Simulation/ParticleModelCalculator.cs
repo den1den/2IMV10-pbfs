@@ -82,8 +82,11 @@ public class ParticleModelCalculator
         }
 
         // TODO: collision detection
-        // TODO: damp velocities
-
+        // damp velocities:
+        for (int i = 0; i < velocities2.Length; i++)
+        {
+            velocities2[i] *= Mathf.Pow(0.01f, 2*dt);
+        }
         // Increment n
         for (int i = 0; i < pm.positions.Length; i++)
         {
