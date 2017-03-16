@@ -45,8 +45,8 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             float invM0 = pm.inverseMasses[i0];
             float invM1 = pm.inverseMasses[i1];
 
-            float compression = 0;
-            float stretch = 0;
+            float compression = 0.03f;
+            float stretch = 0.3f;
 
             //
             Vector3 p2p = Vector3.Scale(pm.positions[i1], Vector3.one) - pm.positions[i0];
