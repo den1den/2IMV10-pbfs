@@ -15,6 +15,8 @@ public class ParticleModelCalculator
 
     const int ITERATIONS = 5;
 
+    const bool ENABLE_GRAVITY = true;
+
     public ParticleModelCalculator(ParticleModel pm)
     {
         this.pm = pm;
@@ -97,10 +99,13 @@ public class ParticleModelCalculator
 
     private void setForces(float dt)
     {
-        const float G = 9.81f;
-        for (int i = 0; i < forces.Length; i++)
+        if (ENABLE_GRAVITY)
         {
-            forces[i] = Vector3.down * G;
+            const float G = 9.81f;
+            for (int i = 0; i < forces.Length; i++)
+            {
+                forces[i] = Vector3.down * G;
+            }
         }
     }
 }
