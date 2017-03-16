@@ -18,7 +18,20 @@ public class ParticleModel : MonoBehaviour
     public float[] masses;
     public float[] inverseMasses;
 
-    public int[] triangleIndices;
+    public struct Triangle
+    {
+        public readonly int a;
+        public readonly int b;
+        public readonly int c;
+        public Triangle(int a, int b, int c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+        
+    }
+        
+    public Triangle[] triangles;
 
     public EnergyFunction[] efs;
 
@@ -35,7 +48,8 @@ public class ParticleModel : MonoBehaviour
             for (int z = 0; z < nz; z++)
                     positions[x * nz + z] = new Vector3(x * dx, yCoord, z * dy); // row major
 
-        triangleIndices = new int[(nx - 1) * (nz - 1) * 3 * 2];
+        triangles = new Triangle[(nx - 1) * (nz - 1) * 2];
+
         int i = 0;
         for (int i0 = 0; i0 < nx - 1; i0++)
         {
@@ -50,12 +64,8 @@ public class ParticleModel : MonoBehaviour
                     // |  \ |
                     // 00 - 01
                     // the two triangles are (00, 01, 10) and (11, 10, 01)
-                    triangleIndices[i++] = i0 * nz + j0;
-                    triangleIndices[i++] = i0 * nz + y1;
-                    triangleIndices[i++] = x1 * nz + j0;
-                    triangleIndices[i++] = x1 * nz + y1;
-                    triangleIndices[i++] = x1 * nz + j0;
-                    triangleIndices[i++] = i0 * nz + y1;
+                    triangles[i++] = new Triangle(i0 * nz + j0, i0 * nz + y1, x1 * nz + j0);
+                    triangles[i++] = new Triangle(x1 * nz + y1, x1 * nz + j0, i0 * nz + y1);
                 }
                 else
                 {
@@ -63,12 +73,8 @@ public class ParticleModel : MonoBehaviour
                     // |  / |
                     // 00 - 01
                     // the two triangles are (00, 01, 11) and (11, 10, 00)
-                    triangleIndices[i++] = i0 * nz + j0;
-                    triangleIndices[i++] = i0 * nz + y1;
-                    triangleIndices[i++] = x1 * nz + y1;
-                    triangleIndices[i++] = x1 * nz + y1;
-                    triangleIndices[i++] = x1 * nz + j0;
-                    triangleIndices[i++] = i0 * nz + j0;
+                    triangles[i++] = new Triangle(i0 * nz + j0, i0 * nz + y1, x1 * nz + y1);
+                    triangles[i++] = new Triangle(x1 * nz + y1, x1 * nz + j0, i0 * nz + j0);
                 }
             }
         }
@@ -121,18 +127,14 @@ public class ParticleModel : MonoBehaviour
         // https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/ClothDemo/main.cpp#L354
         // loop over every triangle
 
-        int nTriangles = triangleIndices.Length / 3;
-        List<EnergyFunction> efs = new List<EnergyFunction>();
 
-        for (int i = 0; i < nTriangles; i++)
+
+
+        foreach (Triangle triangle in triangles)
         {
-            int i0 = triangleIndices[i + 0];
-            int i1 = triangleIndices[i + 1];
-            int i2 = triangleIndices[i + 2];
-
             // Only add FEMTetConstriant for now
-            EnergyFunction fem = FEMTriangleFunction.create(this, i0, i1, i2, youngsModulusX, youngsModulusY, youngsModulusShear, poissonRatioXY, poissonRatioYX);
-            if(fem != null)
+            EnergyFunction fem = FEMTriangleFunction.create(this, triangle.a, triangle.b, triangle.c, youngsModulusX, youngsModulusY, youngsModulusShear, poissonRatioXY, poissonRatioYX);
+            if (fem != null)
             {
                 efs.Add(fem);
             }
@@ -140,8 +142,7 @@ public class ParticleModel : MonoBehaviour
             // TODO: OR we can only add Distance and Volume constraints
             // https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/ClothDemo/main.cpp#L340
         }
-        Debug.Log(efs.Count + " FEMFunctions created for " + nTriangles + " triangles");
-        this.efs = efs.ToArray();
+        Debug.Log(efs.Count + " FEMFunctions created for " + triangles.Length + " triangles");
     }
 
     // Update is called once per frame
