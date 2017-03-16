@@ -12,7 +12,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         int i0, i1;
         float initialDistance;
 
-        public DistanceFunction(ParticleModel pm, int i0, int i1, float initialDistance)
+        private DistanceFunction(ParticleModel pm, int i0, int i1, float initialDistance)
         {
             this.pm = pm;
             this.i0 = i0;
@@ -23,11 +23,18 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
         public static DistanceFunction create(ParticleModel pm, int i0, int i1)
         {
+            if (i0 == i1)
+                throw new Exception("Can't define Distance function on same particle");
+
             Vector3 v0 = pm.positions[i0];
             Vector3 v1 = pm.positions[i1];
             float distance = Vector3.Magnitude(new Vector3(v0.x - v1.x, v0.y - v1.y, v0.z - v1.z));
 
-            return new DistanceFunction(pm, i0, i1, distance);
+            if (i0 < i1)
+                return new DistanceFunction(pm, i0, i1, distance);
+            else
+                return new DistanceFunction(pm, i1, i0, distance);
+
         }
 
         /// <summary>
@@ -58,6 +65,22 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             positions[i0] += invM0 * correction;
             positions[i1] -= invM1 * correction;
             
+        }
+
+        public override int GetHashCode()
+        {
+            // return i0; // -> 4-8 items per bucket
+            return i0 * 2 + i1 % 2;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is DistanceFunction)) return false;
+            else
+            {
+                DistanceFunction other = (DistanceFunction)obj;
+                return i0 == other.i0 && i1 == other.i1;
+            }
         }
     }
 }
