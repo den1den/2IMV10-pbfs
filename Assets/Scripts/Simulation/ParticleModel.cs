@@ -117,6 +117,40 @@ public class ParticleModel : MonoBehaviour
 
     private void initConstraints()
     {
+        List<EnergyFunction> efs = new List<EnergyFunction>();
+
+        initFEMTriangleFunctions(efs);
+        initDistanceFunctions(efs);
+
+        this.efs = efs.ToArray();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="efs"></param>
+    private void initDistanceFunctions(List<EnergyFunction> efs)
+    {
+        HashSet<EnergyFunction> distancefunctions = new HashSet<EnergyFunction>();
+
+        foreach (Triangle triangle in triangles)
+        {
+            distancefunctions.Add(DistanceFunction.create(this, triangle.a, triangle.b));
+            distancefunctions.Add(DistanceFunction.create(this, triangle.a, triangle.c));
+            distancefunctions.Add(DistanceFunction.create(this, triangle.b, triangle.c));
+        }
+
+        efs.AddRange(distancefunctions);
+    }
+
+
+    /// <summary>
+    /// Define al FEM triangle functions and add them to the given list of energy functions. 
+    /// </summary>
+    /// <param name="efs"></param>
+    private void initFEMTriangleFunctions(List<EnergyFunction> efs)
+    {
+        
         // Initial values taken from https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/master/Demos/Simulation/SimulationModel.cpp#L11 onwards.
         const float youngsModulusX = 1;
         const float youngsModulusY = 1;
