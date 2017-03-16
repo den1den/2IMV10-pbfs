@@ -49,7 +49,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             float stretch = 0;
 
             //
-            Vector3 p2p = Vector3.Scale(pm.positions[i0], Vector3.one) - pm.positions[i1];
+            Vector3 p2p = Vector3.Scale(pm.positions[i1], Vector3.one) - pm.positions[i0];
             float distance = p2p.magnitude;
 
             // If the two points are distanced correctly, they don't want to move
