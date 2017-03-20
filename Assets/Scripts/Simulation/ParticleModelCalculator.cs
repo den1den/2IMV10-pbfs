@@ -10,8 +10,11 @@ using UnityEngine;
 public class ParticleModelCalculator
 {
     ParticleModel pm;
-    Vector3[] initialPositions;
     Vector3[] forces;
+    Vector3[] positions;
+    Vector3[] corrections;
+
+    int update = 0;
 
     const int ITERATIONS = 5;
 
@@ -24,15 +27,7 @@ public class ParticleModelCalculator
         forces = new Vector3[pm.positions.Length];
         corrections = new Vector3[pm.positions.Length];
         positions = new Vector3[pm.positions.Length];
-        initialPositions = new Vector3[pm.positions.Length];
-        Array.Copy(pm.positions, initialPositions, pm.positions.Length);
-
     }
-
-    Vector3[] positions;
-    Vector3[] corrections;
-
-    int update = 0;
 
     // Update is called once per frame
     public void Update(float dt)
@@ -44,7 +39,13 @@ public class ParticleModelCalculator
         for(int i = 0; i < corrections.Length; i++)
         {
             corrections[i] = Vector2.zero;
-            positions[i] = pm.positions[i];
+        }
+
+        System.Random r = new System.Random();
+        for(int i = 0; i < positions.Length; i++ ) {
+            Vector3 dv = pm.velocities[i] + forces[i] * dt * pm.inverseMasses[i];
+            //float rv = ( float ) r.NextDouble() * 1.1f;
+            positions[ i ] = pm.positions[ i ] + dv * dt;// + new Vector3(rv,rv,rv);
         }
 
         // Solve C(x + dx) == 0
@@ -85,19 +86,19 @@ public class ParticleModelCalculator
         float timeFactor = 1f / dt;
         for (int i = 0; i < corrections.Length; i++)
         {
-            pm.velocities[i] = timeFactor * (corrections[i]);
+            pm.velocities[ i ] = timeFactor * ( positions[ i ] - pm.positions[ i ] );// (corrections[i]);
         }
 
         // TODO: collision detection
         // damp velocities:
         for (int i = 0; i < pm.velocities.Length; i++)
         {
-            pm.velocities[i] *= Mathf.Pow(0.3f, dt);
+            //pm.velocities[i] *= Mathf.Pow(0.3f, dt);
         }
         // Increment n
         for (int i = 0; i < pm.positions.Length; i++)
         {
-            pm.positions[i] += positions[i];
+            pm.positions[i] = positions[i];
         }
     }
 

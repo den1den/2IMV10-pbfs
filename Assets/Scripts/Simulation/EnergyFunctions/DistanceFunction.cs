@@ -45,25 +45,28 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         /// </summary>
         public void solve(ref Vector3[] positions, ref Vector3[] corrections)
         {
-            float compression = 0.03f;
+            float compression = 0.3f;
             float stretch = 0.3f;
 
             //
-            Vector3 p2p = Vector3.Scale(positions[i1], Vector3.one) - positions[i0];
+            Vector3 p2p = positions[i1] - positions[i0];
             float distance = p2p.magnitude;
 
             // If the two points are distanced correctly, they don't want to move
-            if (Math.Abs(distance - initialDistance) < 0.0001f)
-                return;
+            //if (Math.Abs(distance - initialDistance) < 0.0001f)
+            //    return;
 
             // Otherwise see whether the two points are compressed or stretched and compute a new vector 
             // representing the distance between the two points
             float factor = distance < initialDistance ? compression : stretch;
+            //factor *= 2;
             Vector3 correction = p2p.normalized * factor * ((distance - initialDistance) / (invM0 + invM1));
 
             // now apply the correction to both points
             corrections[i0] += invM0 * correction;
             corrections[i1] -= invM1 * correction;
+            //positions[ i0 ] += correction * invM0;
+            //positions[ i1 ] -= correction * invM1;
             
         }
 

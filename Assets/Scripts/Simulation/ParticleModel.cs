@@ -183,6 +183,6 @@ public class ParticleModel : MonoBehaviour
     public void Update()
     {
         // Update model via the ParticleModelCalculator
-        pmc.Update(Time.deltaTime);
+        pmc.Update( 0.016f );// Time.deltaTime);
     }
 }
