@@ -53,7 +53,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             float distance = p2p.magnitude;
 
             // If the two points are distanced correctly, they don't want to move
-            if (distance == initialDistance)
+            if (Math.Abs(distance - initialDistance) < 0.0001f)
                 return;
 
             // Otherwise see whether the two points are compressed or stretched and compute a new vector 
