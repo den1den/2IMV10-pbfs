@@ -82,7 +82,6 @@
     <Compile Include="Assets\Scripts\Simulation\ParticleModel.cs" />
     <Compile Include="Assets\Scripts\Simulation\ParticleModelCalculator.cs" />
     <Compile Include="Assets\Scripts\Simulation\TriangularMesh.cs" />
-    <Compile Include="Assets\Scripts\Simulation\TriangularMeshCalculator.cs" />
     <Compile Include="Assets\Scripts\Tools\Geometry\MeshGenerator.cs" />
     <Compile Include="Assets\Scripts\Tools\Geometry\PrimitiveHelper.cs" />
     <Compile Include="Assets\Scripts\Tools\ManagmentMono.cs" />
