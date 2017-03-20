@@ -32,4 +32,18 @@ public abstract class Util : MonoBehaviour
         }
         return diff;
     }
+
+    public struct Triangle
+    {
+        public readonly int a;
+        public readonly int b;
+        public readonly int c;
+        public Triangle(int a, int b, int c)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+    }
 }
