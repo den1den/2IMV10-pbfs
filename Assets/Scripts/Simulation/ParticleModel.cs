@@ -179,4 +179,13 @@ public class ParticleModel : MonoBehaviour
     {
         return index == 0 || index == particles * particles - particles;
     }
+
+    /// <summary>
+    /// Get the total number of particles in the width and height
+    /// </summary>
+    /// <returns>this.particles</returns>
+    public int getWidthHeight()
+    {
+        return particles;
+    }
 }

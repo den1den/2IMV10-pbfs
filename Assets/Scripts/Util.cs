@@ -44,7 +44,6 @@ public abstract class Util : MonoBehaviour
             this.b = b;
             this.c = c;
         }
-
     }
 
     public static int[] TrianglesToIndexArray(Triangle[] triangles, Boolean flipped = false)
