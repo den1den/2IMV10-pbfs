@@ -8,15 +8,16 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 {
     class DistanceFunction : EnergyFunction
     {
-        ParticleModel pm;
         int i0, i1;
+        float invM0, invM1;
         float initialDistance;
 
-        private DistanceFunction(ParticleModel pm, int i0, int i1, float initialDistance)
+        private DistanceFunction(int i0, int i1, float invM0, float invM1, float initialDistance)
         {
-            this.pm = pm;
             this.i0 = i0;
             this.i1 = i1;
+            this.invM0 = invM0;
+            this.invM1 = invM1;
             this.initialDistance = initialDistance;
             
         }
@@ -28,23 +29,22 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
             Vector3 v0 = pm.positions[i0];
             Vector3 v1 = pm.positions[i1];
+            float invM0 = pm.inverseMasses[i0];
+            float invM1 = pm.inverseMasses[i1];
             float distance = Vector3.Magnitude(new Vector3(v0.x - v1.x, v0.y - v1.y, v0.z - v1.z));
 
             if (i0 < i1)
-                return new DistanceFunction(pm, i0, i1, distance);
+                return new DistanceFunction(i0, i1, invM0, invM1, distance);
             else
-                return new DistanceFunction(pm, i1, i0, distance);
+                return new DistanceFunction(i1, i0, invM1, invM0, distance);
 
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void solve(ref Vector3[] positions)
+        public void solve(ref Vector3[] positions, ref Vector3[] corrections)
         {
-            float invM0 = pm.inverseMasses[i0];
-            float invM1 = pm.inverseMasses[i1];
-
             float compression = 0.03f;
             float stretch = 0.3f;
 
@@ -62,8 +62,8 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             Vector3 correction = p2p.normalized * factor * ((distance - initialDistance) / (invM0 + invM1));
 
             // now apply the correction to both points
-            positions[i0] += invM0 * correction;
-            positions[i1] -= invM1 * correction;
+            corrections[i0] += invM0 * correction;
+            corrections[i1] -= invM1 * correction;
             
         }
 

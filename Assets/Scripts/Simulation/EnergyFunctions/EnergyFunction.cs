@@ -8,6 +8,6 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 {
     public interface EnergyFunction
     {
-        void solve(ref Vector3[] positions);
+        void solve(ref Vector3[] positions, ref Vector3[] corrections);
     }
 }
