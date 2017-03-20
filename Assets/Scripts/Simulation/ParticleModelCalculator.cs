@@ -22,15 +22,15 @@ public class ParticleModelCalculator
         this.pm = pm;
 
         forces = new Vector3[pm.positions.Length];
-        velocities2 = new Vector3[pm.positions.Length];
-        positions2 = new Vector3[pm.positions.Length];
+        corrections = new Vector3[pm.positions.Length];
+        positions = new Vector3[pm.positions.Length];
         initialPositions = new Vector3[pm.positions.Length];
         Array.Copy(pm.positions, initialPositions, pm.positions.Length);
 
     }
 
-    Vector3[] velocities2;
-    Vector3[] positions2;
+    Vector3[] positions;
+    Vector3[] corrections;
 
     int update = 0;
 
@@ -40,12 +40,12 @@ public class ParticleModelCalculator
         update++;
         setForces(dt);
 
-        for(int i = 0; i < velocities2.Length; i++)
+        // Reset corrections
+        for(int i = 0; i < corrections.Length; i++)
         {
-            velocities2[i] = pm.velocities[i] + forces[i] * dt * pm.inverseMasses[i];
-            positions2[i] = pm.positions[i] + velocities2[i] * dt;
+            corrections[i] = Vector2.zero;
+            positions[i] = pm.positions[i];
         }
-        Debug.Log("positions2: " + positions2);
 
         // Solve C(x + dx) == 0
         // Newton-Raphson: x_{n+1} = x_n - f(x_n)/f'(x_n), but computationally expensive
@@ -66,34 +66,38 @@ public class ParticleModelCalculator
         // (2) considering the mass we have: ∆x = 1/m λ ∇_x C(x)
         // (3) subsituting: λ = -C(x) / ( Sum_i w_i |∇_{x,i} C(x)|^2 )
 
-        Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions, iterating "+ITERATIONS+" times");
-        Vector3[] debugPreEnergyFunctionPostitions = new Vector3[positions2.Length];
-        Array.Copy(positions2, debugPreEnergyFunctionPostitions, positions2.Length);
+        //Debug.Log("Calling solve on "+ pm.efs.Length + " EnergyFunctions, iterating "+ITERATIONS+" times");
         for (int iteration = 0; iteration < ITERATIONS; ++iteration) {
-            foreach(EnergyFunction e in pm.efs)
+
+            // What if we let every iteration have 1 / ITERATIONS effect on the actual corrected values? This could lead to a more stable system.
+
+            foreach (EnergyFunction e in pm.efs)
             {
-                e.solve(ref positions2);
+                e.solve(ref positions, ref corrections);
+            }
+
+            for (int i = 0; i < corrections.Length; i++)
+            {
+                positions[i] = pm.positions[i] + corrections[i];
             }
         }
-        float diff = Util.getTotalDifference(debugPreEnergyFunctionPostitions, positions2);
-        Debug.Log("EnergyFunction provide total change of " + diff);
 
-        for (int i = 0; i < velocities2.Length; i++)
+        float timeFactor = 1f / dt;
+        for (int i = 0; i < corrections.Length; i++)
         {
-            velocities2[i] = (1.0f / dt) * (positions2[i] - pm.positions[i]);
+            pm.velocities[i] = timeFactor * (corrections[i]);
         }
 
         // TODO: collision detection
         // damp velocities:
-        for (int i = 0; i < velocities2.Length; i++)
+        for (int i = 0; i < pm.velocities.Length; i++)
         {
-            velocities2[i] *= Mathf.Pow(0.01f, 2*dt);
+            pm.velocities[i] *= Mathf.Pow(0.3f, dt);
         }
         // Increment n
         for (int i = 0; i < pm.positions.Length; i++)
         {
-            pm.positions[i] = positions2[i];
-            pm.velocities[i] = velocities2[i];
+            pm.positions[i] += positions[i];
         }
     }
 
