@@ -5,7 +5,7 @@ using UnityEngine;
 
 /// <summary>
 /// This class contains the model for the triangular mesh around the particle model.
-/// A visualization should only use this class to display the triangluar mesh in Unity
+/// Only this class should be used to display the triangluar mesh in Unity
 /// </summary>
 public class TriangularModelMesh : TriangularMesh
 {
@@ -47,7 +47,7 @@ public class TriangularModelMesh : TriangularMesh
         this.mesh.uv = uv;
 
         Util.Triangle[] triangles = this.model.triangles; // maps points to triangles
-        this.mesh.triangles = Util.TrianglesToIndexArray(triangles);
+        this.mesh.triangles = Util.TrianglesToIndexArray(triangles, true);
     }
 
     public override Vector3[] getMainPoints()
@@ -64,6 +64,16 @@ public class TriangularModelMesh : TriangularMesh
     public override void Update()
     {
         // No calculations needed on subparticles
+        // Update positions
+        Vector3[] vertices = this.mesh.vertices;
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i] = this.model.positions[i];
+        }
+        mesh.vertices = vertices;
+        mesh.RecalculateBounds();
+        // triangles remains the same
+        // uv remains the same
     }
 }
 public abstract class TriangularMesh

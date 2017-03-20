@@ -47,14 +47,14 @@ public abstract class Util : MonoBehaviour
 
     }
 
-    public static int[] TrianglesToIndexArray(Triangle[] triangles)
+    public static int[] TrianglesToIndexArray(Triangle[] triangles, Boolean flipped = false)
     {
         int[] result = new int[triangles.Length * 3];
         for(int i = 0; i < triangles.Length; i++)
         {
             result[3 * i + 0] = triangles[i].a;
-            result[3 * i + 1] = triangles[i].b;
-            result[3 * i + 2] = triangles[i].c;
+            result[3 * i + 1] = !flipped ? triangles[i].b : triangles[i].c;
+            result[3 * i + 2] = !flipped ? triangles[i].c : triangles[i].b;
         }
         return result;
     }
