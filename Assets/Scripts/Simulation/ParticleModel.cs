@@ -119,7 +119,7 @@ public class ParticleModel : MonoBehaviour
     {
         List<EnergyFunction> efs = new List<EnergyFunction>();
 
-        initFEMTriangleFunctions(efs);
+        //initFEMTriangleFunctions(efs);
         initDistanceFunctions(efs);
 
         this.efs = efs.ToArray();
