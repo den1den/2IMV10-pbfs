@@ -80,16 +80,6 @@ namespace Assets.Scripts {
 
         }
 
-        void testParticleVis() {
-            var testArr = new Vector3[4];
-            testArr[ 0 ].Set( -1, -1, 0 );
-            testArr[ 1 ].Set( -1, 1, 0 );
-            testArr[ 2 ].Set( 1, 1, 0 );
-            testArr[ 3 ].Set( 1, -1, 0 );
-            var pv = new Tools.Visualisation.ParticleVisualisation(new SimplePositionTriangleMesh(testArr));
-            
-        }
-
         void Update( ) {
             if ( objectManager != null && false) {
                 foreach ( var t in objectManager.GetAll( ) ) {

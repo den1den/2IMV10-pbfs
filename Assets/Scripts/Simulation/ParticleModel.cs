@@ -13,6 +13,7 @@ using UnityEngine;
 /// </summary>
 public class ParticleModel : MonoBehaviour
 {
+    private int particles; // The number of particles vertically and horizontally
     public Vector3[] positions;
     public Vector3[] velocities;
     public float[] masses;
@@ -88,6 +89,7 @@ public class ParticleModel : MonoBehaviour
     {
         // Create particles
         int RES = settings.particles;
+        this.particles = RES;
         float SIZE = settings.totalSize;
         float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
         float zCoord = 1;
@@ -171,5 +173,10 @@ public class ParticleModel : MonoBehaviour
     {
         // Update model via the ParticleModelCalculator
         pmc.Update(Time.deltaTime);
+    }
+
+    public bool isSpecialPoint(int index)
+    {
+        return index == 0 || index == particles * particles - particles;
     }
 }

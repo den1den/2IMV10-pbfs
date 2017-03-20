@@ -10,9 +10,15 @@ namespace Assets.Scripts.Tools.Visualisation {
 
         MonoManager<SceneObject> objectManager;
 
-        private TriangularMesh model;
+        private ParticleModel model;
 
-        public ParticleVisualisation( TriangularMesh model ) {
+
+        public ParticleVisualisation(ParticleModel model, ClothSimulation settings) : this(model)
+        {
+            // Could store extra settings from the Unity GUI via the ClothSimulation class
+        }
+
+        public ParticleVisualisation(ParticleModel model) {
             this.model = model;
             GameObject unitPrefab = new GameObject();
             objectManager = new MonoManager<SceneObject>( );
@@ -29,24 +35,19 @@ namespace Assets.Scripts.Tools.Visualisation {
             Material specialMaterial = new Material(Shader.Find("Transparent/Diffuse"));
             specialMaterial.color = Color.red;
 
-            Vector3[] points = this.model.getMainPoints();
+            Vector3[] points = model.positions;
             for ( int i = 0; i < points.Length; i++ ) {
                 Material material = this.model.isSpecialPoint(i) ? specialMaterial : defaultMaterial;
                 var newObj = objectManager.New( );
                 newObj.Init( mesh, material );
                 newObj.transform.position = points[ i ];
             }
-            Debug.Log("Prticle visualization initialized for " + points.Length + " particles");
-        }
-
-        public ParticleVisualisation(TriangularMesh model, ClothSimulation settings) : this(model)
-        {
-            // Could store extra settings from the Unity GUI via the ClothSimulation class
+            Debug.Log("Particle visualization initialized for " + points.Length + " particles");
         }
 
         public void Update( ) {
             int i = 0;
-            Vector3[] points = this.model.getMainPoints();
+            Vector3[] points = this.model.positions;
             foreach ( var obj in objectManager.GetAll( ) ) {
                 if ( i > points.Length ) break;
                 obj.transform.position = points[i++];

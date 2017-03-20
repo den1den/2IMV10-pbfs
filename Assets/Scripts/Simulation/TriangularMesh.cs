@@ -13,13 +13,9 @@ public class TriangularModelMesh : TriangularMesh
 
     private Mesh mesh;
 
-    public delegate bool IsSpecialFunc( int id );
-    IsSpecialFunc f;
-
-    public TriangularModelMesh(ParticleModel model, IsSpecialFunc f, ClothSimulation settings)
+    public TriangularModelMesh(ParticleModel model, ClothSimulation settings)
     {
         this.model = model;
-        this.f = f;
 
         GameObject meshGameObject = new GameObject("TriangularModelMesh");
 
@@ -29,7 +25,7 @@ public class TriangularModelMesh : TriangularMesh
         MeshRenderer meshRenderer = meshGameObject.AddComponent<MeshRenderer>();
         Material defaultMaterial = new Material(Shader.Find("Transparent/Diffuse"));
         meshRenderer.sharedMaterial = defaultMaterial;
-        
+
         this.mesh.Clear();
 
         // Create a square grid
@@ -43,7 +39,7 @@ public class TriangularModelMesh : TriangularMesh
         Debug.Assert(Math.Sqrt(uv.Length) == width, "Assert model poistions is exactly squared");
         float du = 1.0f / width;
         float dv = du;
-        for(int u = 0; u < width; u++)
+        for (int u = 0; u < width; u++)
             for (int v = 0; v < width; v++)
             {
                 uv[u * width + v] = new Vector2(u * du, v * dv);
@@ -69,30 +65,10 @@ public class TriangularModelMesh : TriangularMesh
     {
         // No calculations needed on subparticles
     }
-
-    public override bool isSpecialPoint(int i)
-    {
-        return f( i );
-    }
 }
-
 public abstract class TriangularMesh
 {
     public abstract Vector3[] getMainPoints();
     public virtual Vector3[] getSubPoints() { return new Vector3[0];  }
-    public virtual bool isSpecialPoint(int i) { return false; }
     public virtual void Update() { }
-}
-
-public class SimplePositionTriangleMesh : TriangularMesh
-{
-    public Vector3[] points;
-    public SimplePositionTriangleMesh(Vector3[] points)
-    {
-        this.points = points;
-    }
-    public override Vector3[] getMainPoints()
-    {
-        return this.points;
-    }
 }
