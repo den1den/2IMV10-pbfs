@@ -2,16 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 /// <summary>
 /// This class binds to a unity GameObject and sets up a cloth simulation.
 /// All public settings in this object could be modified during runetime via the Unity GUI
 /// </summary>
 public class ClothSimulation : MonoBehaviour {
-
+    public static ClothSimulation gInst;
     public int particles = 3; // Total particles: particles * particles
     public float totalSize = 20;
-    public bool parrallel = false;
+    public bool parrallel = true;
     public int iterations = 5;
 
     // TODO: link attributes to Energy Functions
@@ -28,11 +33,14 @@ public class ClothSimulation : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Application.runInBackground = true;
-        UnityEditor.SceneView.FocusWindowIfItsOpen( typeof( UnityEditor.SceneView ) );
+#if UNITY_EDITOR
+        //SceneView.FocusWindowIfItsOpen( typeof( SceneView ) );
+#endif
         model = new ParticleModel(this);
         meshModel = new TriangularModelMesh(model, x => x == 0 || x == particles * particles - particles, this);
         simpleVis = new ParticleVisualisation(meshModel, this);
-	}
+        gInst = this;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -47,6 +55,6 @@ public class ClothSimulation : MonoBehaviour {
 
         model.Update();
         meshModel.Update();
-        simpleVis.Update();
+        if (simpleVis != null) simpleVis.Update();
 	}
 }

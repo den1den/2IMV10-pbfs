@@ -11,7 +11,7 @@ using UnityEngine;
 /// It should not be depending on any energy function
 /// It is used to apply external forces and execute the symplectic euler intergration scheme (update velocities/speeds/masses)
 /// </summary>
-public class ParticleModel : MonoBehaviour {
+public class ParticleModel {
     public Vector3[] positions;
     public Vector3[] velocities;
     public Vector3[] forces;

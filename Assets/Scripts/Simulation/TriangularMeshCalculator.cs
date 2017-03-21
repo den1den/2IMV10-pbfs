@@ -6,7 +6,7 @@ using UnityEngine;
 /// Here all calculations for the visual triangular mesh are done
 /// At first this will just be the similar to the particlemodel
 /// </summary>
-public class TriangularMeshCalculator : MonoBehaviour {
+public class TriangularMeshCalculator {
     TriangularModelMesh tm;
 
     public TriangularMeshCalculator(TriangularModelMesh tm)
