@@ -23,7 +23,7 @@ namespace Assets.Scripts.Tools.Visualisation {
             // set as instantiatable object for our factory:
             objectManager.OverrideGameObject( unitPrefab );
 
-            Mesh mesh = Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube);
+            Mesh mesh = Geometry.PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Sphere);
             Material defaultMaterial = new Material(Shader.Find("Transparent/Diffuse"));
 
             Material specialMaterial = new Material(Shader.Find("Transparent/Diffuse"));
@@ -48,7 +48,7 @@ namespace Assets.Scripts.Tools.Visualisation {
             int i = 0;
             Vector3[] points = this.model.getMainPoints();
             foreach ( var obj in objectManager.GetAll( ) ) {
-                if ( i > points.Length ) break;
+                //if ( i > points.Length ) break;
                 obj.transform.position = points[i++];
             }
         }

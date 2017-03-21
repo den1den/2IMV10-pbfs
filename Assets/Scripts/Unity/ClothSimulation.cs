@@ -11,6 +11,8 @@ public class ClothSimulation : MonoBehaviour {
 
     public int particles = 3; // Total particles: particles * particles
     public float totalSize = 20;
+    public bool parrallel = false;
+    public int iterations = 5;
 
     // TODO: link attributes to Energy Functions
     public float youngsModulusX;
@@ -25,6 +27,8 @@ public class ClothSimulation : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        Application.runInBackground = true;
+        UnityEditor.SceneView.FocusWindowIfItsOpen( typeof( UnityEditor.SceneView ) );
         model = new ParticleModel(this);
         meshModel = new TriangularModelMesh(model, x => x == 0 || x == particles * particles - particles, this);
         simpleVis = new ParticleVisualisation(meshModel, this);
@@ -32,6 +36,15 @@ public class ClothSimulation : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        // write settings
+        model.Calculator.Iterations = iterations;
+
+        // write settings if changed
+        model.VerifyMode( parrallel );
+
+
+        // TODO: implement other settings:
+
         model.Update();
         meshModel.Update();
         simpleVis.Update();

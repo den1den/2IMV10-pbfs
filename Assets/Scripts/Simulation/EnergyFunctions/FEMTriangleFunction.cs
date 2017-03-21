@@ -175,6 +175,10 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
                 }
             }
         }
+
+        public int[ ] GetParticles( ) {
+            throw new NotImplementedException( );
+        }
     }
 }
 

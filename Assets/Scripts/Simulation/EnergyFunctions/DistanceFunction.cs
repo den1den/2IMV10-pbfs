@@ -12,7 +12,11 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         float invM0, invM1;
         float initialDistance;
 
-        private DistanceFunction(int i0, int i1, float invM0, float invM1, float initialDistance)
+        const float f = 0.3f;
+        float compression = f;
+        float stretch = f;
+
+        private DistanceFunction(int i0, int i1, float invM0, float invM1, float initialDistance )
         {
             this.i0 = i0;
             this.i1 = i1;
@@ -40,15 +44,8 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public void solve(ref Vector3[] positions, ref Vector3[] corrections)
+        public void solve(ref Vector3[ ] positions, ref Vector3[ ] corrections)
         {
-            float compression = 0.3f;
-            float stretch = 0.3f;
-
-            //
             Vector3 p2p = positions[i1] - positions[i0];
             float distance = p2p.magnitude;
 
@@ -64,10 +61,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
             // now apply the correction to both points
             corrections[i0] += invM0 * correction;
-            corrections[i1] -= invM1 * correction;
-            //positions[ i0 ] += correction * invM0;
-            //positions[ i1 ] -= correction * invM1;
-            
+            corrections[i1] -= invM1 * correction;            
         }
 
         public override int GetHashCode()
@@ -84,6 +78,10 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
                 DistanceFunction other = (DistanceFunction)obj;
                 return i0 == other.i0 && i1 == other.i1;
             }
+        }
+
+        public int[ ] GetParticles( ) {
+            return new int[ ] { i0, i1 };
         }
     }
 }
