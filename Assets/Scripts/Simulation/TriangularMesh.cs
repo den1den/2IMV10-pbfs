@@ -30,15 +30,17 @@ public class TriangularModelMesh : TriangularMesh
 
         this.mesh.Clear();
 
-        const int subMeshPoints = 5; // 5 extra points added for the submesh
-        const int subMeshTriangleCount = 8;
+        const int subMeshPoints = 5; // 5 extra points added for the submesh per 4 particle points
+        const int subMeshTriangleCount = 8; // 8 triangles added for each submesh
         int modelWH = this.model.getWidthHeight();
         subMeshes = new SubMesh[(modelWH - 1) * (modelWH - 1)];
 
-        // Create a square grid and fill the first part of this.points
-        points = new Vector3[model.positions.Length + subMeshPoints * subMeshes.Length]; // points on which to render cloth
+        // Store all the points in the triangluar mesh
+        // where points[] = particle model points + extra triangluar mesh points
+        // s.t. points[i] = model.positions[i]
+        points = new Vector3[model.positions.Length + subMeshPoints * subMeshes.Length];
         Array.Copy(model.positions, points, model.positions.Length);
-        // Fill the second part with all submesh points
+
         int index = 0;
         for (int i = 0; i < modelWH - 1; i++)
             for(int j = 0; j < modelWH - 1; j++)
@@ -60,7 +62,7 @@ public class TriangularModelMesh : TriangularMesh
         this.mesh.vertices = points;
 
         // Calculate the uvs
-        Vector2[] uv = new Vector2[model.positions.Length + subMeshPoints * subMeshes.Length]; // uv maps texture to points
+        Vector2[] uv = new Vector2[points.Length]; // uv maps texture to points
         float du = 1.0f / modelWH;
         float dv = 1.0f / modelWH;
         for (int u = 0; u < modelWH; u++)
