@@ -143,20 +143,20 @@ public class TriangularModelMesh : TriangularMesh
 
         public void update()
         {
-            points[ab] = points[a] + points[b] * 0.5f;
-            points[bc] = points[b] + points[c] * 0.5f;
-            points[cd] = points[c] + points[d] * 0.5f;
-            points[da] = points[d] + points[a] * 0.5f;
-            points[m] = points[a] + points[c] * 0.5f;
+            points[ab] = (points[a] + points[b]) * 0.5f;
+            points[bc] = (points[b] + points[c]) * 0.5f;
+            points[cd] = (points[c] + points[d]) * 0.5f;
+            points[da] = (points[d] + points[a]) * 0.5f;
+            points[m] = (points[a] + points[c]) * 0.5f;
         }
 
         public void setUv(ref Vector2[] uv)
         {
-            uv[ab] = uv[a] + uv[b] * 0.5f;
-            uv[bc] = uv[b] + uv[c] * 0.5f;
-            uv[cd] = uv[c] + uv[d] * 0.5f;
-            uv[da] = uv[d] + uv[a] * 0.5f;
-            uv[m] = uv[a] + uv[c] * 0.5f;
+            uv[ab] = (uv[a] + uv[b]) * 0.5f;
+            uv[bc] = (uv[b] + uv[c]) * 0.5f;
+            uv[cd] = (uv[c] + uv[d]) * 0.5f;
+            uv[da] = (uv[d] + uv[a]) * 0.5f;
+            uv[m] = (uv[a] + uv[c]) * 0.5f;
         }
     }
 }
