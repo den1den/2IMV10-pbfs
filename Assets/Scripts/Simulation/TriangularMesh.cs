@@ -12,8 +12,10 @@ public class TriangularModelMesh : TriangularMesh
     private ParticleModel model;
 
     private Mesh mesh;
+
     private Vector3[] points;
-    private SubMesh[] subMeshes;
+    private SubLine[] subLines;
+    private SubGrid[] subGrids;
 
     public TriangularModelMesh(ParticleModel model, ClothSimulation settings)
     {
@@ -30,133 +32,225 @@ public class TriangularModelMesh : TriangularMesh
 
         this.mesh.Clear();
 
-        const int subMeshPoints = 5; // 5 extra points added for the submesh per 4 particle points
-        const int subMeshTriangleCount = 8; // 8 triangles added for each submesh
+        int subdivisions = 1;
         int modelWH = this.model.getWidthHeight();
-        subMeshes = new SubMesh[(modelWH - 1) * (modelWH - 1)];
 
-        // Store all the points in the triangluar mesh
-        // where points[] = particle model points + extra triangluar mesh points
-        // s.t. points[i] = model.positions[i]
-        points = new Vector3[model.positions.Length + subMeshPoints * subMeshes.Length];
+        points = new Vector3[(int)Math.Pow((modelWH + (modelWH - 1)) * subdivisions, 2)];
         Array.Copy(model.positions, points, model.positions.Length);
+        int index = model.positions.Length;
 
-        int index = 0;
-        for (int i = 0; i < modelWH - 1; i++)
-            for(int j = 0; j < modelWH - 1; j++)
+        List<int> triangles = new List<int>();
+        
+        List<SubLine> SubLines = new List<SubLine>();
+        for (int j = 0; j < modelWH; j++) // horizontal
+            for (int i = 0; i < modelWH - 1; i++)
             {
-                int a = i * modelWH + j;
-                int b = i * modelWH + j + 1;
-                int c = (i + 1) * modelWH + j;
-                int d = (i + 1) * modelWH + j + 1;
-                SubMesh subMesh = new SubMesh(
-                    model.positions.Length + index * subMeshPoints,
-                    a, b, c, d,
-                    ref points
-                );
-                subMesh.update();
-                subMeshes[index] = subMesh;
-                index++;
+                int left = j * modelWH + i;
+                int right = left + 1;
+                SubLines.Add(new SubLine(left, right, index, index + subdivisions));
+                index = index + subdivisions;
+            }
+        for (int j = 0; j < modelWH - 1; j++) // vertical
+            for (int i = 0; i < modelWH; i++)
+            {
+                int bottom = j * modelWH + i;
+                int top = bottom + modelWH;
+                SubLines.Add(new SubLine(bottom, top, index, index + subdivisions));
+                index = index + subdivisions;
+            }
+        List<SubGrid> SubGrids = new List<SubGrid>();
+        for (int j = 0; j < modelWH - 1; j++)
+            for (int i = 0; i < modelWH - 1; i++)
+            {
+                int a = modelWH * j + i;
+                int b = a + 1;
+                int c = a + modelWH;
+                int d = c + 1;
+
+                SubLine bottom = SubLines[(modelWH - 1) * j + i];
+                SubLine top = SubLines[(modelWH - 1) * (j + 1) + i];
+                SubLine left = SubLines[(modelWH - 1) * modelWH + modelWH * j + i];
+                SubLine right = SubLines[(modelWH - 1) * modelWH + modelWH * j + i + 1];
+
+                SubGrid grid = new SubGrid(ref bottom, ref right, ref left, ref top, index, subdivisions, subdivisions);
+                index += subdivisions * subdivisions;
+                SubGrids.Add(grid);
+
+                // Add triangles for the grid
+                triangles.AddRange(grid.GenTriangles());
             }
 
-        this.mesh.vertices = points;
-
         // Calculate the uvs
-        Vector2[] uv = new Vector2[points.Length]; // uv maps texture to points
+        Vector2[] uvs = new Vector2[points.Length]; // uv maps texture to points
         float du = 1.0f / modelWH;
         float dv = 1.0f / modelWH;
         for (int u = 0; u < modelWH; u++)
             for (int v = 0; v < modelWH; v++)
             {
-                uv[u * modelWH + v] = new Vector2(u * du, v * dv);
+                uvs[u * modelWH + v] = new Vector2(u * du, v * dv);
             }
-        foreach(SubMesh subMesh in subMeshes)
-        {
-            subMesh.setUv(ref uv);
-        }
-        this.mesh.uv = uv;
 
-        int[] triangles = new int[3 * subMeshTriangleCount * subMeshes.Length];
-        for (int i = 0; i < subMeshes.Length; i++)
-        {
-            int[] subMeshTriangles = subMeshes[i].getTriangles();
-            Debug.Assert(3 * subMeshTriangleCount == subMeshTriangles.Length);
-            Array.Copy(subMeshTriangles, 0, triangles, i * 3 * subMeshTriangleCount, 3 * subMeshTriangleCount);
-        }
-        this.mesh.triangles = triangles;
+        SubLines.ForEach(sl => {
+            sl.setPoints(ref points);
+            sl.setUV(ref uvs);
+        });
+        this.subLines = SubLines.ToArray();
+        SubGrids.ForEach(sl => {
+            sl.setPoints(ref points);
+            sl.setUV(ref uvs);
+        });
+        this.subGrids = SubGrids.ToArray();
+
+        // Set unit mesh
+        this.mesh.vertices = points;
+        this.mesh.uv = uvs;
+        this.mesh.triangles = addBothSide(triangles.ToArray());
     }
 
     public override void Update()
     {
-        // No calculations needed on subparticles
+        points = this.mesh.vertices;
         // Update positions
-        Vector3[] vertices = this.mesh.vertices;
         for (int i = 0; i < this.model.positions.Length; i++)
         {
-            vertices[i] = this.model.positions[i];
+            points[i] = this.model.positions[i];
         }
-        mesh.vertices = vertices;
-        mesh.RecalculateBounds();
+        for (int i = 0; i < this.subLines.Length; i++)
+        {
+            this.subLines[i].setPoints(ref points);
+        }
+        for (int i = 0; i < this.subGrids.Length; i++)
+        {
+            this.subGrids[i].setPoints(ref points);
+        }
         // triangles remains the same
         // uv remains the same
+        mesh.vertices = points;
+        mesh.RecalculateBounds();
     }
 
-    /// <summary>
-    /// A submesh of 8 triangles between 4 points:
-    /// [/][/]
-    /// [/][/]
-    /// </summary>
-    struct SubMesh
+    private static int[] addBothSide(int[] trianlges)
     {
-        int a, b, c, d;
-        int ab, bc, cd, da, m;
-        Vector3[] points;
-        public SubMesh(int startIndex, int a, int b, int c, int d, ref Vector3[] points)
+        int[] r = new int[trianlges.Length * 2];
+        for(int i = 0; i < trianlges.Length / 3; i++)
         {
-            this.points = points;
-            this.a = a; this.b = b; this.c = c; this.d = d;
-            ab = startIndex + 0;
-            bc = startIndex + 1;
-            cd = startIndex + 2;
-            da = startIndex + 3;
-            m = startIndex + 4;
-            if(m >= points.Length)
+            r[3 * i + 0] = trianlges[3 * i + 0];
+            r[3 * i + 1] = trianlges[3 * i + 1];
+            r[3 * i + 2] = trianlges[3 * i + 2];
+            r[3 * i + trianlges.Length + 0] = trianlges[3 * i];
+            r[3 * i + trianlges.Length + 1] = trianlges[3 * i + 2];
+            r[3 * i + trianlges.Length + 2] = trianlges[3 * i + 1];
+        }
+        return r;
+    }
+
+    class SubLine
+    {
+        public int a, b;
+        public int startIndex;
+        public int endIndex;
+        public SubLine(int a, int b, int startIndex, int endIndex)
+        {
+            this.a = a; this.b = b;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+        }
+
+        public void setPoints(ref Vector3[] points)
+        {
+            for(int i = this.startIndex; i < this.endIndex; i++)
             {
-                int k = 7;
+                points[i] = (points[a] + points[b]) * 0.5f;
             }
         }
 
-        public int[] getTriangles()
+        public void setUV(ref Vector2[] uvs)
         {
-            return new int[]
+            for (int i = this.startIndex; i < this.endIndex; i++)
             {
-                a, m, da,
-                a, ab, m,
-                ab, bc, m,
-                ab, b, bc,
-                da, cd, d,
-                da, m, cd,
-                m, c, cd,
-                m, bc, c
-            };
+                uvs[i] = (uvs[a] + uvs[b]) * 0.5f;
+            }
+        }
+    }
+
+    struct SubGrid
+    {
+        SubLine bottom; SubLine right; SubLine left; SubLine top;
+        int startIndex;
+        int w;
+        int h;
+        public SubGrid(ref SubLine b, ref SubLine r, ref SubLine l, ref SubLine t, int startIndex, int w, int h)
+        {
+            this.bottom = b; this.right = r; this.left = l; this.top = t;
+            this.startIndex = startIndex;
+            this.w = w;
+            this.h = h;
         }
 
-        public void update()
+        public void setPoints(ref Vector3[] points)
         {
-            points[ab] = (points[a] + points[b]) * 0.5f;
-            points[bc] = (points[b] + points[c]) * 0.5f;
-            points[cd] = (points[c] + points[d]) * 0.5f;
-            points[da] = (points[d] + points[a]) * 0.5f;
-            points[m] = (points[a] + points[c]) * 0.5f;
+            for (int i = 0; i < this.w; i++)
+                for(int j = 0; j < this.h; j++)
+                    {
+                        points[this.startIndex + i * this.w + j] = (points[left.a] + points[left.b] + points[right.a] + points[right.b]) * 0.25f;
+                    }
         }
 
-        public void setUv(ref Vector2[] uv)
+        public void setUV(ref Vector2[] uvs)
         {
-            uv[ab] = (uv[a] + uv[b]) * 0.5f;
-            uv[bc] = (uv[b] + uv[c]) * 0.5f;
-            uv[cd] = (uv[c] + uv[d]) * 0.5f;
-            uv[da] = (uv[d] + uv[a]) * 0.5f;
-            uv[m] = (uv[a] + uv[c]) * 0.5f;
+            for (int i = 0; i < this.w; i++)
+                for (int j = 0; j < this.h; j++)
+                {
+                    uvs[this.startIndex + i * this.w + j] = (uvs[left.a] + uvs[left.b] + uvs[right.a] + uvs[right.b]) * 0.25f;
+                }
+        }
+
+        /// <summary>
+        /// A submesh of 8 triangles between 4 points:
+        /// [/][/]
+        /// [/][/]
+        /// </summary>
+        internal List<int> GenTriangles()
+        {
+            List<int> result = new List<int>();
+
+            // bottom
+            result.Add(bottom.a);
+            result.Add(bottom.startIndex);
+            result.Add(this.startIndex);
+
+            result.Add(bottom.endIndex - 1);
+            result.Add(bottom.b);
+            result.Add(this.startIndex + this.w - 1);
+
+            //right
+            result.Add(right.a);
+            result.Add(right.startIndex);
+            result.Add(this.startIndex + this.w - 1);
+
+            result.Add(right.endIndex - 1);
+            result.Add(right.b);
+            result.Add(this.startIndex + this.w * this.h - 1);
+
+            // top
+            result.Add(top.b);
+            result.Add(top.endIndex - 1);
+            result.Add(this.startIndex + this.w * this.h - 1);
+
+            result.Add(top.startIndex);
+            result.Add(top.a);
+            result.Add(this.startIndex + (this.h - 1) * this.w);
+
+            //left
+            result.Add(left.b);
+            result.Add(left.endIndex - 1);
+            result.Add(this.startIndex + (this.h - 1) * this.w);
+
+            result.Add(left.startIndex);
+            result.Add(left.a);
+            result.Add(this.startIndex);
+
+            return result;
         }
     }
 }
