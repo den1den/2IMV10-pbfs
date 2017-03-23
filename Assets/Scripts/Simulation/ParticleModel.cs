@@ -18,6 +18,7 @@ public class ParticleModel {
     public Vector3[] forces;
     public float[] masses;
     public float[] inverseMasses;
+    int Res;
 
         
     public Util.Triangle[] triangles;
@@ -45,6 +46,7 @@ public class ParticleModel {
                 positions[ x * nz + z ] = new Vector3( x * dx, yCoord, z * dy ); // row major
 
         triangles = new Util.Triangle[(nx - 1) * (nz - 1) * 2];
+
 
 
         int i = 0;
@@ -98,6 +100,7 @@ public class ParticleModel {
         float SIZE = settings.totalSize;
         float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
         float zCoord = 1;
+        this.Res = RES;
         initPoints( D, D, RES, RES, zCoord );
         Debug.Log( positions.Length + " particles created" );
 
@@ -128,18 +131,41 @@ public class ParticleModel {
     /// </summary>
     /// <param name="efs"></param>
     private void initDistanceFunctions( List<EnergyFunction> efs ) {
-        HashSet<EnergyFunction> distancefunctions = new HashSet<EnergyFunction>();
 
+        // add straight edges
+        for ( int i = 0; i < Res; i++ ) {
+            for ( int j = 0; j < Res - 1; j++ ) {
+                int x_0 = i * Res + j;
+                int x_1 = i * Res + j + 1;
+                int y_0 = j * Res + i;
+                int y_1 = j * Res + i + Res;
+                efs.Add( DistanceFunction.create( this, x_0, x_1 ) );
+                efs.Add( DistanceFunction.create( this, y_0, y_1 ) );
+            }
+        }
 
+        // add cross edges
+        for ( int i = 0; i < Res - 1; i++ ) {
+            for ( int j = 0; j < Res - 1; j++ ) {
+                int id0 = i * Res + j;
+                int id1 = id0 + 1;
+                int id2 = id0 + Res;
+                int id3 = id0 + Res + 1;
+                efs.Add( DistanceFunction.create( this, id0, id3 ) );
+                efs.Add( DistanceFunction.create( this, id1, id2 ) );
+            }
+        }
+
+        /*HashSet<EnergyFunction> distancefunctions = new HashSet<EnergyFunction>();
         foreach (Util.Triangle triangle in triangles)
         {
             distancefunctions.Add(DistanceFunction.create(this, triangle.a, triangle.b));
             distancefunctions.Add(DistanceFunction.create(this, triangle.a, triangle.c));
             distancefunctions.Add(DistanceFunction.create(this, triangle.b, triangle.c));
         }
+        efs.AddRange(distancefunctions);*/
 
-        efs.AddRange( distancefunctions );
-    }
+     }
 
 
     /// <summary>
