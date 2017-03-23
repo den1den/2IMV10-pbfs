@@ -9,6 +9,8 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
     class BendingFunction : EnergyFunction
     {
+        const float EPS = 1e-6f;
+
         private int i0, i1, i2, i3;
         private int[] particles;
         private float invM0, invM1, invM2, invM3;
@@ -131,7 +133,36 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
         public void solve(ref Vector3[] positions, ref Vector3[] corrections)
         {
-            
+            float energy = 0f;
+            for (int i = 0; i < 4; ++i)
+                for (int j = 0; j < 4; ++j)
+                    energy += Q[j, i] * (Vector3.Dot(positions[particles[i]], positions[particles[j]]));
+            energy *= 0.5f;
+
+            Vector3[] gradients = new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero};
+
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    gradients[j] += Q[j, i] * positions[particles[j]];
+
+
+            float sum_normGradC = 0.0f;
+            for (int i = 0; i < 4; i++)
+            {
+                sum_normGradC += inverseMasses[i] * InnerProduct(gradients[i]);
+            }
+
+            // exit early if required
+            if (Math.Abs(sum_normGradC) > EPS)
+            {
+                // compute impulse-based scaling factor
+                float s = energy / sum_normGradC;
+
+                for (int i = 0; i < 4; ++i)
+                {
+                    corrections[particles[i]] = /*-stiffness*/ -0.01f * (s * inverseMasses[i]) * gradients[i];
+                }
+            }
         }
     }
 }
