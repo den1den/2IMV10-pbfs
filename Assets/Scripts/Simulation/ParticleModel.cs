@@ -31,6 +31,7 @@ public class ParticleModel {
 
 
     public EnergyFunction[] efs;
+    private readonly int particlesSize;
 
 
     /// <summary>
@@ -93,6 +94,7 @@ public class ParticleModel {
     public ParticleModel( ClothSimulation settings ) {
         // Create particles
         int RES = settings.particles;
+        this.particlesSize = RES;
         float SIZE = settings.totalSize;
         float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
         float zCoord = 1;
@@ -204,6 +206,6 @@ public class ParticleModel {
     /// <returns>this.particles</returns>
     public int getWidthHeight()
     {
-        return particles;
+        return this.particlesSize;
     }
 }
