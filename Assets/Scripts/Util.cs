@@ -22,4 +22,40 @@ public abstract class Util : MonoBehaviour
         m[3, 3] = 1;
         return m;
     }
+
+    internal static float getTotalDifference(Vector3[] a, Vector3[] b)
+    {
+        float diff = 0;
+        for(int i = 0; i < a.Length; i++)
+        {
+            diff += (a[i] - b[i]).magnitude;
+        }
+        return diff;
+    }
+
+    public struct Triangle
+    {
+        public readonly int a;
+        public readonly int b;
+        public readonly int c;
+        public Triangle(int a, int b, int c)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+    }
+
+    public static int[] TrianglesToIndexArray(Triangle[] triangles, Boolean flipped = false)
+    {
+        int[] result = new int[triangles.Length * 3];
+        for(int i = 0; i < triangles.Length; i++)
+        {
+            result[3 * i + 0] = triangles[i].a;
+            result[3 * i + 1] = !flipped ? triangles[i].b : triangles[i].c;
+            result[3 * i + 2] = !flipped ? triangles[i].c : triangles[i].b;
+        }
+        return result;
+    }
 }

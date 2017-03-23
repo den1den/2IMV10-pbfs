@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InputField1 : MonoBehaviour {
+public class IterationsInputField : MonoBehaviour {
 
     void Start( ) {
         var input = gameObject.GetComponent<InputField>();
@@ -16,6 +17,9 @@ public class InputField1 : MonoBehaviour {
     }
 
     private void SubmitName( string arg0 ) {
-        Debug.Log( arg0 );
+        double result;
+        if (Double.TryParse(arg0, out result)) {
+            ClothSimulation.gInst.iterations = (int) result;
+        }
     }
 }

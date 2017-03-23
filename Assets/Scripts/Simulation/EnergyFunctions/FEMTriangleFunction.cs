@@ -94,7 +94,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
         /// Based on code by Müller and Bender. The original C++ code is available through the following link:
         /// https://github.com/InteractiveComputerGraphics/PositionBasedDynamics/blob/a737f21a704a94227c943a9a2291a0e9f31366e2/PositionBasedDynamics/PositionBasedDynamics.cpp#L882
         /// </summary>
-        public void solve(ref Vector3[] positions)
+        public void solve(ref Vector3[] positions, ref Vector3[] corrections)
         {
 
             // Orthotropic elasticity tensor
@@ -174,6 +174,10 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
                 }
             }
+        }
+
+        public int[ ] GetParticles( ) {
+            throw new NotImplementedException( );
         }
     }
 }
