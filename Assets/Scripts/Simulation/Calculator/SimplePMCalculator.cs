@@ -14,6 +14,7 @@ using System.IO;
 public class SimplePMCalculator : PMCalculator {
     ParticleModel pm;
     Physics physics;
+    CollisionDetector cd;
     Vector3[] positions;
     Vector3[] corrections;
 
@@ -26,6 +27,7 @@ public class SimplePMCalculator : PMCalculator {
 
     public SimplePMCalculator( ParticleModel pm ) {
         this.pm = pm;
+        cd = new CollisionDetector(pm);
 
         corrections = new Vector3[ pm.Count ];
         positions = new Vector3[ pm.Count ];
@@ -78,7 +80,7 @@ public class SimplePMCalculator : PMCalculator {
             pm.velocities[ i ] = corrections[ i ] / dt;
         }
 
-        // TODO: collision detection
+        cd.detectAndResolve();
 
         physics.DampVelocities( pm, dt );
 
