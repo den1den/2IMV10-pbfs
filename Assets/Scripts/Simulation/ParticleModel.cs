@@ -124,6 +124,7 @@ public class ParticleModel {
 
         //initFEMTriangleFunctions(efs);
         initDistanceFunctions( efs );
+        initBendingFunctions(efs);
 
         this.efs = efs.ToArray( );
     }
@@ -168,6 +169,150 @@ public class ParticleModel {
         efs.AddRange(distancefunctions);*/
 
      }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="efs"></param>
+    private void initBendingFunctions(List<EnergyFunction> efs)
+    {
+
+        /*
+         * First all vertical stencils:
+         * 
+         *     x,y
+         *      |
+         *      V
+         *      
+         * i2_1 *
+         *      |\
+         *   i0 *-* i1
+         *       \|
+         *        * i3_1
+         *
+         * And mirrored:
+         * 
+         *     x,y
+         *      |
+         *      V
+         *        * i2_2
+         *       /|
+         *   i0 *-* i1
+         *      |/
+         * i3_2 *
+         */
+        for (int y = 0; y < Res - 2; ++y)
+        {
+            for (int x = 0; x < Res - 1; ++x)
+            {
+
+                //Common points
+                int i0 = gridXYToParticle(x, y + 1);
+                int i1 = gridXYToParticle(x + 1, y + 1);
+
+                // Additional points for first stencil
+                int i2_1 = gridXYToParticle(x, y);
+                int i3_1 = gridXYToParticle(x + 1, y + 2);
+
+                // Additional points for second stencil
+                int i2_2 = gridXYToParticle(x + 1, y);
+                int i3_2 = gridXYToParticle(x, y + 2);
+
+                // Create bending function on both stencils
+                efs.Add(BendingFunction.create(this, i0, i1, i2_1, i3_1));
+                efs.Add(BendingFunction.create(this, i0, i1, i2_2, i3_2));
+            }
+        }
+
+        /* 
+         * Then all horizontal stencils
+         * 
+         *     x,y
+         *      |
+         *      V
+         *        i0
+         * i2_1 *-* 
+         *       \|\
+         *        *-* i3_1
+         *        i1
+         *
+         * And mirrored
+         * 
+         *     x,y
+         *      |
+         *      V
+         *        i0
+         *        *-* i3_2
+         *       /|/
+         * i2_2 *-*
+         *        i1
+         */
+        for (int y = 0; y < Res - 1; ++y)
+        {
+            for (int x = 0; x < Res - 2; ++x)
+            {
+
+                //Common points
+                int i0 = gridXYToParticle(x + 1, y);
+                int i1 = gridXYToParticle(x + 1, y + 1);
+
+                // Additional points for first stencil
+                int i2_1 = gridXYToParticle(x, y);
+                int i3_1 = gridXYToParticle(x + 2, y + 1);
+
+                // Additional points for second stencil
+                int i2_2 = gridXYToParticle(x, y + 1);
+                int i3_2 = gridXYToParticle(x + 2, y);
+
+                // Create bending function on both stencils
+                efs.Add(BendingFunction.create(this, i0, i1, i2_1, i3_1));
+                efs.Add(BendingFunction.create(this, i0, i1, i2_2, i3_2));
+            }
+        }
+        
+
+        /*
+         * Then all diagonal stencils
+         *      
+         *     i0   i1
+         *      *---*
+         *      |\ /|
+         *      | X |
+         *      |/ \|
+         *      *---*
+         *     i2   i3
+         * Note that this uses the diagonals i0 i3 and i1 i2, not i0 i1 as was previously the case. 
+         * 
+         */
+        for (int y = 0; y < Res - 1; ++y)
+        {
+            for (int x = 0; x < Res - 1; ++x)
+            {
+                //Common points
+                int i0 = gridXYToParticle(x, y);
+                int i1 = gridXYToParticle(x + 1, y);
+                int i2 = gridXYToParticle(x, y + 1);
+                int i3 = gridXYToParticle(x + 1, y + 1);
+                
+                // Create bending function on both stencils
+                efs.Add(BendingFunction.create(this, i0, i3, i1, i2));
+                efs.Add(BendingFunction.create(this, i1, i2, i0, i3));
+            }
+        }
+
+    }
+
+    /// <summary>
+    /// Converts an x y coordinate in the particle grid to the index of that particle in the particles array. 
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private int gridXYToParticle(int x, int y)
+    {
+        return y * Res + x;
+    }
+
 
 
     /// <summary>
