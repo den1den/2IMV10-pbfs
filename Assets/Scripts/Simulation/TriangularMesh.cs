@@ -309,52 +309,6 @@ public class TriangularModelMesh : TriangularMesh
                 b = nextB.point(bezierHalfIndex, ref readPoints);
                 writePoints[base.b] = b;
             }
-
-            return;
-
-            if (prevB == null || nextB == null)
-            {
-                Bezier bezier;
-                int bI;
-                if (prevB != null)
-                {
-                    // prev bezier has to start halfway
-                    bezier = prevB;
-                    bI = bezierHalfIndex;
-                }
-                else
-                {
-                    bezier = nextB;
-                    bI = 0;
-                }
-
-                // Write bezier to points
-                a = bezier.point(bI++, ref readPoints);
-                writePoints[base.a] = a;
-                for (int i = 0; i < L; i++)
-                {
-                    point = bezier.point(bI++, ref readPoints);
-                    writePoints[i + startIndex] = point;
-                }
-                b = bezier.point(bI++, ref readPoints);
-                writePoints[base.b] = b;
-            } else
-            {
-                a = prevB.point(bezierHalfIndex, ref readPoints);
-                writePoints[base.a] = a;
-                float t = 0;
-                float dt = 1.0f / (L + 1);
-                for (int i = 0; i < L; i++)
-                {
-                    a = prevB.point(bezierHalfIndex + i, ref readPoints);
-                    b = nextB.point(i, ref readPoints);
-                    point = a * (1 - t) + b * t;
-                    writePoints[startIndex + i] = point;
-                    t += dt;
-                }
-                b = nextB.point(bezierHalfIndex, ref readPoints);
-                writePoints[base.b] = b;
-            }
         }
     }
 
