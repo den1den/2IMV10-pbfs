@@ -118,14 +118,14 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             float factor = (3 / (area0 + area1));
 
             Vector4 K = new Vector4(C01 + C04, C02 + C03, -C01 - C02, -C03 - C04);
-            Vector4 KT = new Vector4(K[3], K[2], K[1], K[0]);
+            Vector4 KT = new Vector4(factor * K[3], factor * K[2], factor * K[1], factor * K[0]);
 
             Matrix4x4 Q = new Matrix4x4();
 
             for (int i = 0; i < 4; ++i) {
                 Q[i, i] = K[i] * KT[i];
                 for (int j = 0; j < i; j++)
-                    Q[i, j] = Q[j, i] = factor * K[i] * KT[j];
+                    Q[i, j] = Q[j, i] = K[i] * KT[j];
             }
 
             return Q;
@@ -160,7 +160,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
                 for (int i = 0; i < 4; ++i)
                 {
-                    corrections[particles[i]] = /*-stiffness*/ -0.01f * (s * inverseMasses[i]) * gradients[i];
+                    corrections[particles[i]] += /*-stiffness*/ -0.01f * (s * inverseMasses[i]) * gradients[i];
                 }
             }
         }
