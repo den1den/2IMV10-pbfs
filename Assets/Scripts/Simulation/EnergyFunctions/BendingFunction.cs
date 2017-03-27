@@ -105,19 +105,19 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
             float area1 = TriangleArea(i0, i1, i3, ref positions);
 
             Vector3 e0 = positions[i1] - positions[i0];
-            Vector3 e1 = positions[i2] - positions[i1];
-            Vector3 e2 = positions[i0] - positions[i2];
-            Vector3 e3 = positions[i3] - positions[i0];
-            Vector3 e4 = positions[i1] - positions[i3];
+            Vector3 e1 = positions[i2] - positions[i0];
+            Vector3 e2 = positions[i3] - positions[i0];
+            Vector3 e3 = positions[i2] - positions[i1];
+            Vector3 e4 = positions[i3] - positions[i1];
 
             float C01 = 1 / (float) Math.Tan(Vector3.Angle(e0, e1));
             float C02 = 1 / (float) Math.Tan(Vector3.Angle(e0, e2));
-            float C03 = 1 / (float) Math.Tan(Vector3.Angle(e0, e3));
-            float C04 = 1 / (float) Math.Tan(Vector3.Angle(e0, e4));
+            float C03 = 1 / (float) Math.Tan(Vector3.Angle(-e0, e3));
+            float C04 = 1 / (float) Math.Tan(Vector3.Angle(-e0, e4));
 
-            float factor = (3 / (area0 + area1));
+            float factor = -(1.5f / (area0 + area1));
 
-            Vector4 K = new Vector4(C01 + C04, C02 + C03, -C01 - C02, -C03 - C04);
+            Vector4 K = new Vector4(C03 + C04, C01 + C02, -C01 - C03, -C02 - C04);
             Vector4 KT = new Vector4(factor * K[3], factor * K[2], factor * K[1], factor * K[0]);
 
             Matrix4x4 Q = new Matrix4x4();
@@ -141,10 +141,12 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
             Vector3[] gradients = new Vector3[] { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero};
 
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++)
-                    gradients[j] += Q[j, i] * positions[particles[j]];
-
+            for ( int i = 0; i < 4; i++ ) {
+                for ( int j = 0; j < 4; j++ ) {
+                    Vector3 z = Q[ j, i ] * positions[ particles[ j ] ];
+                    gradients[ j ] += z;
+                }
+            }
 
             float sum_normGradC = 0.0f;
             for (int i = 0; i < 4; i++)
@@ -160,7 +162,7 @@ namespace Assets.Scripts.Simulation.EnergyFunctions
 
                 for (int i = 0; i < 4; ++i)
                 {
-                    corrections[particles[i]] += /*-stiffness*/ -0.01f * (s * inverseMasses[i]) * gradients[i];
+                    corrections[particles[i]] += /*-stiffness*/ -10000000.1f * (s * inverseMasses[i]) * gradients[i];
                 }
             }
         }
