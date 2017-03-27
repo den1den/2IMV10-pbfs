@@ -92,12 +92,14 @@ public class ParticleModel {
         inverseMasses[ ( nx - 1 ) * nz + 0 ] = 0; // x = nx, y = 0
        }
 
+    public float SIZE;
+
     // Use this for initialization
     public ParticleModel( ClothSimulation settings ) {
         // Create particles
         int RES = settings.particles;
         this.particlesSize = RES;
-        float SIZE = settings.totalSize;
+        SIZE = settings.totalSize;
         float D = SIZE / RES; // dx, dy, dz = total size devided by resolution 
         float zCoord = 1;
         this.Res = RES;

@@ -24,7 +24,7 @@ public class TriangularModelMesh : TriangularMesh
     private const bool showGridPoints = false;
     private MonoManager<SceneObject> gridPointsObjectManager;
 
-    public bool bezier = false; // can be changed on the fly
+    public int bezier = 1;
 
     public TriangularModelMesh(ParticleModel model, ClothSimulation settings)
     {
@@ -36,12 +36,12 @@ public class TriangularModelMesh : TriangularMesh
         this.mesh = meshFilter.mesh;
 
         MeshRenderer meshRenderer = meshGameObject.AddComponent<MeshRenderer>();
-        Material defaultMaterial = new Material(Shader.Find("Transparent/Diffuse"));
+        Material defaultMaterial = new Material(Shader.Find("VR/SpatialMapping/Wireframe"));
         meshRenderer.sharedMaterial = defaultMaterial;
 
         this.mesh.Clear();
 
-        int subdivisions = 3;
+        int subdivisions = 6;
         int modelWH = this.model.getWidthHeight();
 
         points = new Vector3[(int)Math.Pow((modelWH + (modelWH - 1)) * subdivisions, 2)];
@@ -59,7 +59,7 @@ public class TriangularModelMesh : TriangularMesh
                 int left = j * modelWH + i;
                 int right = left + 1;
 
-                SubLine subLine = new SubLine(left, right, index, index + subdivisions);
+                SubLine subLine = bezier > 0 ? new BezierSubline(left, right, index, index + subdivisions) : new SubLine(left, right, index, index + subdivisions);
                 index = index + subdivisions;
 
                 if (i > 0)
@@ -79,7 +79,7 @@ public class TriangularModelMesh : TriangularMesh
                 int bottom = j * modelWH + i;
                 int top = bottom + modelWH;
 
-                SubLine subLine = new SubLine(bottom, top, index, index + subdivisions);
+                SubLine subLine = bezier > 0 ? new BezierSubline(bottom, top, index, index + subdivisions) : new SubLine(bottom, top, index, index + subdivisions);
                 index = index + subdivisions;
 
                 if(j > 0)
@@ -158,6 +158,7 @@ public class TriangularModelMesh : TriangularMesh
                 newObj.transform.position = points[i];
             }
         }
+
         SubLines.ForEach(sl => {
             sl.setUV(ref uvs);
         });
@@ -167,18 +168,12 @@ public class TriangularModelMesh : TriangularMesh
         });
         this.subGrids = SubGrids.ToArray();
 
-        if (!bezier)
-        {
-            SubLines.ForEach(sl => {
-                sl.setPoints(ref points);
-            });
-            SubGrids.ForEach(sl => {
-                sl.setPoints(ref points);
-            });
-        } else
-        {
-            //TODO
-        }
+        SubLines.ForEach(sl => {
+            sl.setPoints(ref points);
+        });
+        SubGrids.ForEach(sl => {
+            sl.setPoints(ref points);
+        });
 
         // Set unit mesh
         this.mesh.vertices = points;
@@ -232,6 +227,137 @@ public class TriangularModelMesh : TriangularMesh
         return r;
     }
 
+    class BezierSubline : SubLine
+    {
+        Bezier prevB = null;
+        Bezier nextB = null;
+        public BezierSubline(int a, int b, int startIndex, int endIndex) : base(a, b, startIndex, endIndex)
+        {
+        }
+
+        /// <summary>
+        /// Every bezier curve is liked to its previous and current curve:
+        /// _  _  _  _
+        ///  c1 c2 c3
+        /// </summary>
+        /// <param name="prev"></param>
+        internal override void link(ref SubLine prev)
+        {
+            BezierSubline bPrev = (BezierSubline)prev;
+            base.link(ref prev);
+            Bezier prevB = new Bezier(new int[] { prev.a, a, b }, endIndex - startIndex);
+            this.prevB = prevB;
+            bPrev.nextB = prevB;
+        }
+
+        public override void setPoints(ref Vector3[] writePoints, ref Vector3[] readPoints)
+        {
+            int L = endIndex - startIndex; // number of intermediate points
+            int bezierHalfIndex = L + 2 - 1;
+            Vector3 a, b, point;
+            
+            if (prevB == null || nextB == null)
+            {
+                // Get functiom from single bezier
+                Bezier bezier;
+                int bI;
+                if (prevB != null)
+                {
+                    // prev bezier has to start halfway
+                    bezier = prevB;
+                    bI = bezierHalfIndex;
+                }
+                else
+                {
+                    // current bezier starts at i=0
+                    bezier = nextB;
+                    bI = 0;
+                }
+
+                // Write bezier to points
+                a = bezier.point(bI++, ref readPoints);
+                writePoints[base.a] = a; // control point
+                for (int i = 0; i < L; i++)
+                {
+                    // calculate intermediate bezier points
+                    point = bezier.point(bI++, ref readPoints);
+                    writePoints[i + startIndex] = point;
+                }
+                b = bezier.point(bI++, ref readPoints);
+                writePoints[base.b] = b; // TODO: this control point is updated multiple times (this and next)
+            }
+            else
+            {
+                // Two beziers in this segment
+                // Same as 1 but interpolated
+                a = prevB.point(bezierHalfIndex, ref readPoints);
+                writePoints[base.a] = a;
+
+                float t = 0;
+                float dt = 1.0f / (L + 1);
+                for (int i = 0; i < L; i++)
+                {
+                    a = prevB.point(bezierHalfIndex + 1 + i, ref readPoints);
+                    b = nextB.point(i + 1, ref readPoints);
+
+                    float sint = (float) Math.Sin(Math.PI * t / 2);
+                    point = a * (1 - sint) + b * sint; // interpolate between the two bezier curves
+                    writePoints[startIndex + i] = point;
+                    t += dt;
+                }
+
+                b = nextB.point(bezierHalfIndex, ref readPoints);
+                writePoints[base.b] = b;
+            }
+
+            return;
+
+            if (prevB == null || nextB == null)
+            {
+                Bezier bezier;
+                int bI;
+                if (prevB != null)
+                {
+                    // prev bezier has to start halfway
+                    bezier = prevB;
+                    bI = bezierHalfIndex;
+                }
+                else
+                {
+                    bezier = nextB;
+                    bI = 0;
+                }
+
+                // Write bezier to points
+                a = bezier.point(bI++, ref readPoints);
+                writePoints[base.a] = a;
+                for (int i = 0; i < L; i++)
+                {
+                    point = bezier.point(bI++, ref readPoints);
+                    writePoints[i + startIndex] = point;
+                }
+                b = bezier.point(bI++, ref readPoints);
+                writePoints[base.b] = b;
+            } else
+            {
+                a = prevB.point(bezierHalfIndex, ref readPoints);
+                writePoints[base.a] = a;
+                float t = 0;
+                float dt = 1.0f / (L + 1);
+                for (int i = 0; i < L; i++)
+                {
+                    a = prevB.point(bezierHalfIndex + i, ref readPoints);
+                    b = nextB.point(i, ref readPoints);
+                    point = a * (1 - t) + b * t;
+                    writePoints[startIndex + i] = point;
+                    t += dt;
+                }
+                b = nextB.point(bezierHalfIndex, ref readPoints);
+                writePoints[base.b] = b;
+            }
+        }
+    }
+
     class SubLine
     {
         public int a, b;
@@ -260,14 +386,9 @@ public class TriangularModelMesh : TriangularMesh
             }
         }
 
-        public void setAllPointsBezier(ref Vector3[] points)
+        public virtual void setPoints(ref Vector3[] writePoints, ref Vector3[] readPoints)
         {
-            //TODO
-        }
-
-        public void setPoints(ref Vector3[] points)
-        {
-            setPointsBilinear(ref points);
+            setPointsBilinear(ref writePoints);
         }
 
         public void setUV(ref Vector2[] uvs)
@@ -278,11 +399,18 @@ public class TriangularModelMesh : TriangularMesh
             }
         }
 
-        internal void link(ref SubLine prev)
+        internal virtual void link(ref SubLine prev)
         {
             this.prev = prev;
             prev.next = this;
             Debug.Assert(prev.b == this.a);
+        }
+
+        internal void setPoints(ref Vector3[] points)
+        {
+            Vector3[] pointsCopy = new Vector3[points.Length];
+            Array.Copy(points, pointsCopy, points.Length);
+            setPoints(ref points, ref pointsCopy);
         }
     }
 
@@ -453,4 +581,56 @@ public class TriangularModelMesh : TriangularMesh
 public abstract class TriangularMesh
 {
     public virtual void Update() { }
+}
+public class Bezier
+{
+    int[] points;
+    float[][] factors;
+    public Bezier(int[] points, int subPoints)
+    {
+        this.points = points;
+        int totalPoints = (points.Length - 1) * (subPoints + 1) + 1;
+        int N = points.Length - 1;
+        factors = new float[totalPoints][];
+        float dt = 1.0f / (totalPoints - 1);
+
+        for(int p = 0; p < factors.Length; p++)
+        {
+            factors[p] = new float[points.Length];
+            float t = p * dt;
+            
+            for(int i = 0; i < points.Length; i++)
+            {
+                long t_c = combination(N, i);
+                double t_p = Math.Pow(1 - t, N - i);
+                double t_n = Math.Pow(t, i);
+                
+                float f = (float)(t_c * t_p * t_n);
+                factors[p][i] = f;
+            }
+        }
+    }
+
+    public Vector3 point(int pi, ref Vector3[] points)
+    {
+        Vector3 p = new Vector3();
+        float[] factors = this.factors[pi];
+        for(int i = 0; i < factors.Length; i++)
+        {
+            p += points[this.points[i]] * factors[i];
+        }
+        return p;
+    }
+
+    public static long combination(long n, long k)
+    {
+        double sum = 0;
+        for (long i = 0; i < k; i++)
+        {
+            sum += Math.Log10(n - i);
+            sum -= Math.Log10(i + 1);
+        }
+        return (long)Math.Pow(10, sum);
+    }
+
 }
