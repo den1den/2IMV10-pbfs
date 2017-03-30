@@ -27,7 +27,10 @@ public class SimplePMCalculator : PMCalculator {
 
     public SimplePMCalculator( ParticleModel pm ) {
         this.pm = pm;
-        cd = new CollisionDetector(pm);
+
+        Vector3 minPoint = new Vector3(-10, -10, -10);
+        Vector3 maxPoint = new Vector3(pm.SIZE + 10, pm.SIZE + 10, pm.SIZE + 10);
+        //cd = new CollisionDetector(pm, minPoint, maxPoint);
 
         corrections = new Vector3[ pm.Count ];
         positions = new Vector3[ pm.Count ];
@@ -80,7 +83,7 @@ public class SimplePMCalculator : PMCalculator {
             pm.velocities[ i ] = corrections[ i ] / dt;
         }
 
-        cd.detectAndResolve();
+        //cd.detectAndResolve();
 
         physics.DampVelocities( pm, dt );
 
